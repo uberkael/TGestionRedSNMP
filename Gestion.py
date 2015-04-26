@@ -1,9 +1,5 @@
 #!/usr/bin/python
 import sys
-#####################
-# Biblioteca SNIMPY #
-#####################
-# http://snimpy.readthedocs.org/
 from snimpy.manager import Manager as M
 from snimpy.manager import load
 
@@ -46,6 +42,7 @@ if (len(sys.argv)>3):
 ###########################
 # Definicion de funciones #
 ###########################
+
 def lector(m, funcion):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	try:
@@ -90,7 +87,7 @@ def CheckeaServidor():
 		return 0
 
 ###################################
-# Comienza el programa principal #
+# Cominenza el programa principal #
 ###################################
 if __name__=="__main__":
 	if CheckeaServidor():
