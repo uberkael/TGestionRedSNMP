@@ -1,10 +1,20 @@
 #!/usr/bin/python
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
+<<<<<<< HEAD
 from tkinter import *			# Importa todos los objetos
 from tkinter import ttk			# Importa los themes de Tk
 from tkinter import filedialog	# Importa los dialogos y selector
 from tkinter import font		# Importa fuentes para la consola de errores
+=======
+###################
+# Biblioteca HNMP #
+###################
+# http://pysnmp.sourceforge.net/
+# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-v2c.html
+# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/set-v2c-with-value-type-mib-lookup.html
+from pysnmp.entity.rfc3413.oneliner import cmdgen
+>>>>>>> 947fa51fe076b4eb0e7441e246ff2e368f4e30a3
 
 ######################
 # Variables globales #
@@ -51,7 +61,7 @@ def lector(funcion):
 		f=open(archivo, 'r')
 		for line in f:
 			a=line.split()
-			if (len(a)==2):
+			if (len(a)>=2):
 				if(a[0][0]=="#"):
 					# print("Error: la linea es un comentario")
 					pass
@@ -71,14 +81,42 @@ def setter(a):
 	print("Valor Anterior de", a[0], "TODO: get", a[0])
 	print("TODO: set", a[0], a[1])
 
-
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
-	print("TODO: get", a[0], "y comprobacion")
 	# if (a[1]==" get a[0] "):
-		# print("Correcto")
+	# print("Correcto")
+	cmdGen = cmdgen.CommandGenerator()
+	errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
+		cmdgen.CommunityData('public'),
+		cmdgen.UdpTransportTarget((servidor, 161)),
+		# '1.3.6.1.2.1.1.1.0', '1.3.6.1.2.1.1.6.0' TODO: Cambiar el bucle y ejecutar al final con toda la lista
+		a[0]
+		)
+	# Check for errors and print out results
+	if errorIndication:
+		print(errorIndication)
+		estado=1 # errores
+	else:
+		if errorStatus:
+			print('%s at %s' % (
+				errorStatus.prettyPrint(),
+				errorIndex and varBinds[int(errorIndex)-1] or '?'
+				)
+			)
+			estado=1 # errores
+		else:
+			for name, val in varBinds:
+				print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
+				print("Valor buscado", a[0], "=", a[1])
+				if (a[1]==val.prettyPrint()):
+					print("Correcto")
+				else:
+					print("Error: GET ha devuelto otra cosa")
+					estado=1 # errores
+
+	return estado
 
 #######
 # GUI #
