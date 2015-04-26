@@ -37,7 +37,6 @@ if (len(sys.argv)>3):
 	else:
 		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
 
-
 ###########################
 # Definicion de funciones #
 ###########################
@@ -47,10 +46,16 @@ def setter():
 		f=open(archivo, 'r')
 		for line in f:
 			a=line.split()
-			if (len(a)>2):
-				# TODO: setOID
-				print("Valor Anterior de", a[0], "TODO: get", a[0])
-				print("TODO: set", a[0], a[1])
+			if (len(a)==2):
+				if(a[0][0]=="#"):
+					print("Error: la linea es un comentario")
+				else:
+				# TODO: getOID
+					# TODO: setOID
+					print("Valor Anterior de", a[0], "TODO: get", a[0])
+					print("TODO: set", a[0], a[1])
+			else:
+				print("Error: la linea es incorrecta")
 	except Exception as e:
 		print("Error", e)
 	finally:
@@ -62,12 +67,17 @@ def checker():
 		f=open(archivo, 'r')
 		for line in f:
 			a=line.split()
-			if (a):
+			if (len(a)==2):
+				if(a[0][0]=="#"):
+					print("Error: la linea es un comentario")
+				else:
 				# TODO: getOID
-				print("Valor buscado", a[0], "=", a[1])
-				print("TODO: get", a[0], "y comprobacion")
-				# if (a[1]==" get a[0] "):
-					# print("Correcto")
+					print("Valor buscado", a[0], "=", a[1])
+					print("TODO: get", a[0], "y comprobacion")
+					# if (a[1]==" get a[0] "):
+						# print("Correcto")
+			else:
+				print("Error: la linea es incorrecta")
 	except Exception as e:
 		print("Error", e)
 	finally:
