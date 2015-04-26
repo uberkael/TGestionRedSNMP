@@ -3,8 +3,35 @@ import sys
 from snimpy.manager import Manager as M
 from snimpy.manager import load
 
+######################
+# Variables globales #
+######################
+ip="10.10.10.2"
+archivo='configuracion.ini'
+check=False
+
+###################################
+# Argumentos en linea de comandos #
+###################################
+# Si algun argumento es check, se hace un chequeo
+if (len(sys.argv)>1):
+	for x in sys.argv:
+		if ("check" in x.islower()):
+			check=True
+# El segundo argumento es la ip
+if (len(sys.argv)==2):
+	ip=sys.argv[1]
+# El tercer argumento es un archivo auxiliar
+if (len(sys.argv)>3):
+	ip=sys.argv[1]
+	archivo=sys.argv[2]
+
+###########################
+# Definicion de funciones #
+###########################
 def setter(m):
-	f = open(archivo, 'r')
+	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
+	f=open(archivo, 'r')
 	for line in f:
 		a=line.split()
 		if (a):
@@ -13,48 +40,32 @@ def setter(m):
 			setattr(m, a[0], a[1])
 
 def checker(m):
-	f = open(archivo, 'r')
+	"Lee el archivo linea a linea y comprueba los datos en el dispositivo"
+	f=open(archivo, 'r')
 	for line in f:
 		a=line.split()
 		if (a):
-			print("Valor buscado",a[0] ," = ", a[1])
+			print("Valor buscado", a[0], "=", a[1])
 			if (a[1]==getattr(m, a[0])):
 				print("Correcto")
 
-ip="10.10.10.2"
-archivo='configuracion.ini'
-check=False
+###################################
+# Cominenza el programa principal #
+###################################
+if __name__=="__main__":
+	# Carga las mibs
+	load("mibs/RFC1155-SMI.mib")
+	load("mibs/RFC-1212.mib")
+	load("mibs/rfc1213.mib")
+	# Conexion con el servidor
+	m=M(ip, community="public", version=1)
 
-if (len(sys.argv)>1):
-	for x in sys.argv:
-		if ("check" in x.islower()):
-		check=True
-
-if (len(sys.argv)==2):
-	ip=sys.argv[1]
-
-if (len(sys.argv)>3):
-	ip=sys.argv[1]
-	archivo=sys.argv[2]
-
-#load("SNMPv2-SMI.my")
-#load(" SNMPv2-TC.my")
-load("mibs/RFC1155-SMI.mib")
-load("mibs/RFC-1212.mib")
-load("mibs/rfc1213.mib")
-#load("ejemplo.mib")
-m = M(ip, community="public", version=1)
-#print(m.sysUpTime)
-#print(m.sysContact)
-#m.sysContact = "Georg"
-#print(getattr(m, "sysContact"))
-#setattr(m, "sysContact", "Admin")
-#print(getattr(m, "sysContact"))
-
-if (check):
-	checker(m)
-else
-	setter(m)
-	checker(m)
+	# Solo comprobar
+	if (check):
+		checker(m)
+	# Asignar y comprobar
+	else:
+		setter(m)
+		checker(m)
 
 
