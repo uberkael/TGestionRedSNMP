@@ -79,6 +79,7 @@ def checker(a):
 # Funciones auxiliares #
 ########################
 def CheckeaServidor(servidor):
+	"Comprueba que la ip tiene buen formato"
 	import re
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
