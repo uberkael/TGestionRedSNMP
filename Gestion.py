@@ -67,7 +67,6 @@ def lector(snmp, funcion):
 
 def setter(snmp, a):
 	"Escribe los datos en el dispositivo por SNMP"
-	# TODO: setOID
 	print("Valor Anterior de", a[0], snmp.get(a[0]))
 	snmp.set(a[0], a[1])
 
