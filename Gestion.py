@@ -93,7 +93,8 @@ def CheckeaServidor(servidor):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-	if CheckeaServidor():
+
+	if CheckeaServidor(servidor):
 		# Carga las mibs
 		load("mibs/RFC1155-SMI.mib")
 		load("mibs/RFC-1212.mib")
