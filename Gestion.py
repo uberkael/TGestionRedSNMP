@@ -71,6 +71,7 @@ def GUITk():
 	root.title("Configurador")
 	## Contenedor ##
 	flame=ttk.Frame(root, borderwidth=5, relief="sunken", width=600) # Crea un frame
+	# "flat", "raised", "sunken", "solid", "ridge", or "groove".
 	# flame.configure(width=600) # Ancho del frame (Se suele ajustar automaticamente)
 	# flame.configure(height=400) # Alto del frame (Se suele ajustar automaticamente)
 	## Creacion de un menu ##
@@ -95,7 +96,6 @@ def GUITk():
 	campo.get() # Muestra el valor de la variable usada
 	## Boton ##
 	boton=ttk.Button(flame, text="Boton", width=60, command=TrabajaIdle) # Crea un boton
-	# "flat", "raised", "sunken", "solid", "ridge", or "groove".
 
 	## TODO: Barra de progreso ##
 	## TODO: Consola de errores ##
