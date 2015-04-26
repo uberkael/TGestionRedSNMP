@@ -97,7 +97,7 @@ def CheckeaServidor():
 		return 0
 
 ###################################
-# Cominenza el programa principal #
+# Comienza el programa principal #
 ###################################
 if __name__=="__main__":
 
