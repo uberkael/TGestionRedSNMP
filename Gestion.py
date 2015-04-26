@@ -107,7 +107,6 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 
-
 	if CheckeaServidor(servidor):
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
@@ -115,6 +114,7 @@ if __name__=="__main__":
 		print ("Conexion con el servidor")
 
 		lineas=cuentaLineas(archivo)
+		print(lineas, "lineas")
 		# Solo comprobar
 		if (check):
 			lector(checker)
