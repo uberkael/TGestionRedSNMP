@@ -59,21 +59,36 @@ def checker():
 	finally:
 		pass
 
+########################
+# Funciones auxiliares #
+########################
+def CheckeaServidor():
+	import re
+	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+	if re.match(regexip, servidor):
+		print("Servidor correcto")
+		return 1
+	else:
+		print ("Error ", servidor, " no es una ip")
+		return 0
+
 ###################################
 # Cominenza el programa principal #
 ###################################
 if __name__=="__main__":
-	# TODO: Carga las mibs
-	print ("Carga las mibs")
-	# TODO: Conexion con el servidor
-	print ("Conexion con el servidor")
 
-	# Solo comprobar
-	if (check):
-		checker()
-	# Asignar y comprobar
-	else:
-		setter()
-		checker()
-	# TODO: Fin->Bucle Idle
-	print("Fin")
+	if CheckeaServidor():
+		# TODO: Carga las mibs
+		print ("Carga las mibs")
+		# TODO: Conexion con el servidor
+		print ("Conexion con el servidor")
+
+		# Solo comprobar
+		if (check):
+			checker()
+		# Asignar y comprobar
+		else:
+			setter()
+			checker()
+		# TODO: Fin->Bucle Idle
+		print("Fin")
