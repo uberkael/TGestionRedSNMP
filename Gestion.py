@@ -116,3 +116,4 @@ if __name__=="__main__":
 			lector(snmp, checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
+
