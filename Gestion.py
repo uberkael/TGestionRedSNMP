@@ -96,10 +96,24 @@ def CheckeaServidor(servidor):
 		print ("Error ", servidor, " no es una ip")
 		return 0
 
+def geneRead(reader):
+	"Funcion auxiliar de cuentaLineas()"
+	b = reader(1024 * 1024)
+	while b:
+		yield b
+		b = reader(1024*1024)
+
+def cuentaLineas(archivo):
+	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
+	f = open(archivo, 'rb')
+	f_gen = geneRead(f.raw.read)
+	return sum( buf.count(b'\n') for buf in f_gen )
+
 ###################################
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
+
 
 	if CheckeaServidor(servidor):
 		# TODO: Carga las mibs
@@ -107,6 +121,7 @@ if __name__=="__main__":
 		# Conexion con el servidor
 		snmp = SNMP(servidor, community="public")  # v2c
 
+		lineas=cuentaLineas(archivo)
 		# Solo comprobar
 		if (check):
 			lector(snmp, checker)
