@@ -139,15 +139,16 @@ def TrabajaIdle():
 	print("TODO: Esto activa el estado de espera y configuracion continua")
 	print("Lee el archivo:", archivo)
 	print("conecta con el servidor:", servidor.get())
+	CheckeaServidor(servidor.get())
 
-def CheckeaServidor():
+def CheckeaServidor(servidor):
 	import re
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-	if re.match(regexip, servidor.get()):
+	if re.match(regexip, servidor):
 		print("Servidor correcto")
 		return 1
 	else:
-		print ("Error ", servidor.get(), " no es una ip")
+		print ("Error ", servidor, " no es una ip")
 		return 0
 
 ###################################
@@ -155,7 +156,7 @@ def CheckeaServidor():
 ###################################
 if __name__=="__main__":
 	GUITk()
-	if CheckeaServidor():
+	if CheckeaServidor(servidor.get()):
 		print(archivo)
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
