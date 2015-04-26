@@ -29,6 +29,8 @@ if (len(sys.argv)>3):
 ###########################
 # Definicion de funciones #
 ###########################
+def lector():
+
 def setter(m):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	f=open(archivo, 'r')
