@@ -66,6 +66,7 @@ def checker():
 # GUI #
 #######
 def GUITk():
+	global servidor # Accede a la variable global para cambiar el valor
 	root = Tk()
 	root.title("Configurador")
 	## Contenedor ##
@@ -85,18 +86,25 @@ def GUITk():
 	menu_file.add_command(label='Open file...', command=SelecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
 	menu_file.add_command(label='Close', command=root.quit)
-	## TODO: Campo del servidor con ip -> servidor ##
-	campo=StringVar()
-	campo=ttk.Entry(flame, textvariable=campo, width=40)
+	## Campo del servidor ##
+	abel=ttk.Label(flame, text='Servidor:')
+	aux=servidor
+	servidor=StringVar() # La variable en Tk tiene que ser un StringVar
+	servidor.set(aux) # Sustituye la variable original servidor
+	campo=ttk.Entry(flame, textvariable=servidor, width=40)
 	campo.get() # Muestra el valor de la variable usada
 	## Boton ##
-	button=ttk.Button(flame, text="Boton", width=60, command=TrabajaIdle) # Crea un boton
+	boton=ttk.Button(flame, text="Boton", width=60, command=TrabajaIdle) # Crea un boton
+	# "flat", "raised", "sunken", "solid", "ridge", or "groove".
+
 	## TODO: Barra de progreso ##
 	## TODO: Consola de errores ##
 	## Detalles Tk ##
 	# Agrega a la ventana
-	button.grid() # Agrega el boton
-	flame.grid() # Agrega el frame
+	abel.grid()		# Agrega una etiqueta de texto
+	campo.grid()	# Agrega el campo de escribir
+	boton.grid()	# Agrega el boton
+	flame.grid()	# Agrega el frame
 	# Comienza el dibujo
 	root.mainloop() # Al final
 
@@ -104,15 +112,17 @@ def GUITk():
 # Funciones auxiliares #
 ########################
 def SelecionaArchivo():
-	global archivo
+	global archivo # Accede a la variable global para cambiar el valor
 	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
 def TrabajaIdle():
 	# TODO: Esto activa el estado de espera y configuracion continua
 	print("TODO: Esto activa el estado de espera y configuracion continua")
+	# Comprueba los datos introducidos
+	print("TODO: Esto activa el estado de espera y configuracion continua")
 	print("Lee el archivo:", archivo)
-	print("conecta con el servidor:", ip)
+	print("conecta con el servidor:", servidor.get())
 
 ###################################
 # Cominenza el programa principal #
