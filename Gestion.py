@@ -54,7 +54,7 @@ def lector(funcion):
 		f=open(archivo, 'r')
 		for line in f:
 			a=line.split()
-			if (len(a)==2):
+			if (len(a)>=2):
 				if(a[0][0]=="#"):
 					# print("Error: la linea es un comentario")
 					pass
@@ -90,6 +90,7 @@ def checker(a):
 	# Check for errors and print out results
 	if errorIndication:
 		print(errorIndication)
+		estado=1 # errores
 	else:
 		if errorStatus:
 			print('%s at %s' % (
@@ -97,10 +98,18 @@ def checker(a):
 				errorIndex and varBinds[int(errorIndex)-1] or '?'
 				)
 			)
+			estado=1 # errores
 		else:
 			for name, val in varBinds:
-				print("Aqui")
 				print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
+				print("Valor buscado", a[0], "=", a[1])
+				if (a[1]==val.prettyPrint()):
+					print("Correcto")
+				else:
+					print("Error: GET ha devuelto otra cosa")
+					estado=1 # errores
+
+	return estado
 
 ########################
 # Funciones auxiliares #
