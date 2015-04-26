@@ -54,11 +54,11 @@ def lector(m, funcion):
 			a=line.split()
 			if (len(a)==2):
 				if(a[0][0]=="#"):
-					print("Error: la linea es un comentario")
+					# print("Error: la linea es un comentario")
 				else:
 					funcion(a, m)
 			else:
-				print("Error: la linea es incorrecta")
+				# print("Error: la linea es incorrecta")
 	except Exception as e:
 		print("Error", e)
 	finally:
