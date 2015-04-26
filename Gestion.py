@@ -66,6 +66,3 @@ if __name__=="__main__":
 	else:
 		setter(m)
 		checker(m)
-
-
-
