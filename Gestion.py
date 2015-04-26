@@ -40,7 +40,7 @@ if (len(sys.argv)>3):
 ###########################
 # Definicion de funciones #
 ###########################
-def setter():
+def lector(funcion):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	try:
 		f=open(archivo, 'r')
@@ -50,10 +50,7 @@ def setter():
 				if(a[0][0]=="#"):
 					print("Error: la linea es un comentario")
 				else:
-				# TODO: getOID
-					# TODO: setOID
-					print("Valor Anterior de", a[0], "TODO: get", a[0])
-					print("TODO: set", a[0], a[1])
+					funcion(a)
 			else:
 				print("Error: la linea es incorrecta")
 	except Exception as e:
@@ -61,27 +58,20 @@ def setter():
 	finally:
 		pass
 
-def checker():
-	"Lee el archivo linea a linea y comprueba los datos en el dispositivo"
-	try:
-		f=open(archivo, 'r')
-		for line in f:
-			a=line.split()
-			if (len(a)==2):
-				if(a[0][0]=="#"):
-					print("Error: la linea es un comentario")
-				else:
-				# TODO: getOID
-					print("Valor buscado", a[0], "=", a[1])
-					print("TODO: get", a[0], "y comprobacion")
-					# if (a[1]==" get a[0] "):
-						# print("Correcto")
-			else:
-				print("Error: la linea es incorrecta")
-	except Exception as e:
-		print("Error", e)
-	finally:
-		pass
+def setter(a):
+	"Escribe los datos en el dispositivo por SNMP"
+	# TODO: setOID
+	print("Valor Anterior de", a[0], "TODO: get", a[0])
+	print("TODO: set", a[0], a[1])
+
+
+def checker(a):
+	"Comprueba los datos en el dispositivo por SNMP"
+	# TODO: getOID
+	print("Valor buscado", a[0], "=", a[1])
+	print("TODO: get", a[0], "y comprobacion")
+	# if (a[1]==" get a[0] "):
+		# print("Correcto")
 
 ########################
 # Funciones auxiliares #
@@ -109,10 +99,10 @@ if __name__=="__main__":
 
 		# Solo comprobar
 		if (check):
-			checker()
+			lector(checker)
 		# Asignar y comprobar
 		else:
-			setter()
-			checker()
+			lector(setter)
+			lector(checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
