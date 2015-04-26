@@ -18,10 +18,10 @@ if (len(sys.argv)>1):
 	for x in sys.argv:
 		if ("check" in x.islower()):
 			check=True
-# El segundo argumento es la ip
+# Si hay segundo argumento es la ip
 if (len(sys.argv)==2):
 	ip=sys.argv[1]
-# El tercer argumento es un archivo auxiliar
+# Si hay tres argumentos es la ip y un archivo
 if (len(sys.argv)>3):
 	ip=sys.argv[1]
 	archivo=sys.argv[2]
@@ -35,7 +35,6 @@ def setter(m):
 	for line in f:
 		a=line.split()
 		if (a):
-			#print(a)
 			print("Valor Anterior de ", a[0], getattr(m, a[0], a[1]))
 			setattr(m, a[0], a[1])
 
