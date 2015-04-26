@@ -108,18 +108,21 @@ def GUITk():
 	aux=servidor
 	servidor=StringVar() # La variable en Tk tiene que ser un StringVar
 	servidor.set(aux) # Sustituye la variable original servidor
-	campo=ttk.Entry(flame, textvariable=servidor, width=40)
+	campo=ttk.Entry(flame, textvariable=servidor, width=14)
 	campo.get() # Muestra el valor de la variable usada
+	## Barra de progreso ##
+	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
+	prd.configure('maximum') # muestra el valor maximo (defecto 100)
+	prd.configure(value=10) # pone la barra a un valor
 	## Boton ##
-	boton=ttk.Button(flame, text="Boton", width=60, command=TrabajaIdle) # Crea un boton
-
-	## TODO: Barra de progreso ##
+	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: TrabajaIdle(prd) ) # Crea un boton
 	## TODO: Consola de errores ##
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid()		# Agrega una etiqueta de texto
 	campo.grid()	# Agrega el campo de escribir
 	boton.grid()	# Agrega el boton
+	prd.grid()
 	flame.grid()	# Agrega el frame
 	# Comienza el dibujo
 	root.mainloop() # Al final
@@ -132,13 +135,18 @@ def SelecionaArchivo():
 	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
-def TrabajaIdle():
+def TrabajaIdle(bprogreso):
 	# TODO: Esto activa el estado de espera y configuracion continua
 	print("TODO: Esto activa el estado de espera y configuracion continua")
 	# Comprueba los datos introducidos
 	print("TODO: Esto activa el estado de espera y configuracion continua")
 	print("Lee el archivo:", archivo)
 	print("conecta con el servidor:", servidor.get())
+	# TODO: Cambia la barra segun el archivo
+	if(bprogreso['value']>90):
+		bprogreso['value']=0
+	else:
+		bprogreso['value']=bprogreso['value']+10
 	CheckeaServidor(servidor.get())
 
 def CheckeaServidor(servidor):
