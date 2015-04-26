@@ -1,5 +1,10 @@
 #!/usr/bin/python
 import sys
+###################
+# Biblioteca HNMP #
+###################
+# https://github.com/trehn/hnmp
+from hnmp import SNMP
 
 ######################
 # Variables globales #
@@ -40,7 +45,7 @@ if (len(sys.argv)>3):
 ###########################
 # Definicion de funciones #
 ###########################
-def lector(funcion):
+def lector(snmp, funcion):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	try:
 		f=open(archivo, 'r')
@@ -48,30 +53,35 @@ def lector(funcion):
 			a=line.split()
 			if (len(a)==2):
 				if(a[0][0]=="#"):
-					print("Error: la linea es un comentario")
+					# print("Error: la linea es un comentario")
+					pass
 				else:
-					funcion(a)
+					funcion(snmp, a)
 			else:
-				print("Error: la linea es incorrecta")
+				# print("Error: la linea es incorrecta")
+				pass
 	except Exception as e:
 		print("Error", e)
 	finally:
 		pass
 
-def setter(a):
+def setter(snmp, a):
 	"Escribe los datos en el dispositivo por SNMP"
 	# TODO: setOID
-	print("Valor Anterior de", a[0], "TODO: get", a[0])
-	print("TODO: set", a[0], a[1])
+	print("Valor Anterior de", a[0], snmp.get(a[0]))
+	snmp.set(a[0], a[1])
 
-
-def checker(a):
+def checker(snmp, a):
 	"Comprueba los datos en el dispositivo por SNMP"
-	# TODO: getOID
+	estado=0 # no errores
 	print("Valor buscado", a[0], "=", a[1])
-	print("TODO: get", a[0], "y comprobacion")
-	# if (a[1]==" get a[0] "):
-		# print("Correcto")
+	print(snmp.get(a[0]))
+	if (a[1]==snmp.get(a[0])):
+		print("Correcto")
+	else:
+		print("Error: GET ha devuelto otra cosa")
+		estado=1 # errores
+	return estado
 
 ########################
 # Funciones auxiliares #
@@ -94,15 +104,15 @@ if __name__=="__main__":
 	if CheckeaServidor():
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
-		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
+		# Conexion con el servidor
+		snmp = SNMP(servidor, community="public")  # v2c
 
 		# Solo comprobar
 		if (check):
-			lector(checker)
+			lector(snmp, checker)
 		# Asignar y comprobar
 		else:
-			lector(setter)
-			lector(checker)
+			lector(snmp, setter)
+			lector(snmp, checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
