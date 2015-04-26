@@ -12,17 +12,31 @@ check=False
 # Argumentos en linea de comandos #
 ###################################
 # Si algun argumento es check, se hace un chequeo
-if (len(sys.argv)>1):
-	for x in sys.argv:
-		if ("check" in x.islower()):
-			check=True
+# if (len(sys.argv)>1):
+# 	for x in sys.argv:
+# 		if ("check" in x.islower()):
+# 			check=True
 # Si hay segundo argumento es el servidor
 if (len(sys.argv)==2):
-	servidor=sys.argv[1]
+	if sys.argv[1]=="check":
+		check=True
+	else:
+		servidor=sys.argv[1]
 # Si hay tres argumentos es el servidor y un archivo
+if (len(sys.argv)==3):
+	servidor=sys.argv[1]
+	if sys.argv[2]=="check":
+		check=True
+	else:
+		archivo=sys.argv[2]
 if (len(sys.argv)>3):
 	servidor=sys.argv[1]
 	archivo=sys.argv[2]
+	if sys.argv[2]=="check":
+		check=True
+	else:
+		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
+
 
 ###########################
 # Definicion de funciones #
@@ -33,7 +47,7 @@ def setter():
 		f=open(archivo, 'r')
 		for line in f:
 			a=line.split()
-			if (a):
+			if (len(a)>2):
 				# TODO: setOID
 				print("Valor Anterior de", a[0], "TODO: get", a[0])
 				print("TODO: set", a[0], a[1])
