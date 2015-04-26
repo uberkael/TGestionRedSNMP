@@ -73,9 +73,15 @@ def setter(a, m):
 
 def checker(a, m):
 	"Comprueba los datos en el dispositivo por SNMP"
+	estado=0 # no errores
 	print("Valor buscado", a[0], "=", a[1])
-	if (a[1]==getattr(m, a[0])):
+	print(getattr(m, a[0]))
+	if (a[1]==snmp.get(a[0])):
 		print("Correcto")
+	else:
+		print("Error: GET ha devuelto otra cosa")
+		estado=1 # errores
+	return estado
 
 ########################
 # Funciones auxiliares #
