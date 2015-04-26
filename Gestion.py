@@ -93,7 +93,7 @@ def CheckeaServidor(servidor):
 ###################################
 if __name__=="__main__":
 
-	if CheckeaServidor():
+	if CheckeaServidor(servidor):
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
 		# TODO: Conexion con el servidor
