@@ -4,7 +4,7 @@ import sys
 ######################
 # Variables globales #
 ######################
-ip="10.10.10.2"
+servidor="10.10.10.2"
 archivo='configuracion.ini'
 check=False
 
@@ -16,12 +16,12 @@ if (len(sys.argv)>1):
 	for x in sys.argv:
 		if ("check" in x.islower()):
 			check=True
-# Si hay segundo argumento es la ip
+# Si hay segundo argumento es el servidor
 if (len(sys.argv)==2):
-	ip=sys.argv[1]
-# Si hay tres argumentos es la ip y un archivo
+	servidor=sys.argv[1]
+# Si hay tres argumentos es el servidor y un archivo
 if (len(sys.argv)>3):
-	ip=sys.argv[1]
+	servidor=sys.argv[1]
 	archivo=sys.argv[2]
 
 ###########################
