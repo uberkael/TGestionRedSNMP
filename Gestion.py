@@ -3,6 +3,7 @@ import sys
 from tkinter import *			# Importa todos los objetos
 from tkinter import ttk			# Importa los themes de Tk
 from tkinter import filedialog	# Importa los dialogos y selector
+from tkinter import font		# Importa fuentes para la consola de errores
 
 ######################
 # Variables globales #
@@ -82,6 +83,7 @@ def checker(a):
 # GUI #
 #######
 def GUITk():
+	"Todo el entorno grafico del programa programado en Tk"
 	global servidor # Accede a la variable global para cambiar el valor
 	root = Tk()
 	root.title("Configurador")
@@ -114,15 +116,19 @@ def GUITk():
 	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
 	prd.configure('maximum') # muestra el valor maximo (defecto 100)
 	prd.configure(value=10) # pone la barra a un valor
+	## Consola de errores ##
+	# una fuente de windows
+	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
+	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
 	## Boton ##
-	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: TrabajaIdle(prd) ) # Crea un boton
-	## TODO: Consola de errores ##
+	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: TrabajaIdle(prd, texto) ) # Crea un boton
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid()		# Agrega una etiqueta de texto
-	campo.grid()	# Agrega el campo de escribir
-	boton.grid()	# Agrega el boton
-	prd.grid()
+	campo.grid()	# Agrega campo de servidor
+	boton.grid()	# Agrega boton
+	prd.grid()		# Agrega barra de progreso
+	texto.grid()	# Agrega consola de errores
 	flame.grid()	# Agrega el frame
 	# Comienza el dibujo
 	root.mainloop() # Al final
@@ -131,25 +137,37 @@ def GUITk():
 # Funciones auxiliares #
 ########################
 def SelecionaArchivo():
+	"Dialogo para seleccionar un archivo, File, New"
 	global archivo # Accede a la variable global para cambiar el valor
 	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
-def TrabajaIdle(bprogreso):
+def TrabajaIdle(bprogreso, texto):
+	"Funcion donde debe de entrar en el bucle de configuracion"
 	# TODO: Esto activa el estado de espera y configuracion continua
-	print("TODO: Esto activa el estado de espera y configuracion continua")
+	cadena="TODO: Esto activa el estado de espera y configuracion continua"
+	print(cadena)
+	texto.insert("end", cadena+"\n") # Consola al inicio
 	# Comprueba los datos introducidos
-	print("TODO: Esto activa el estado de espera y configuracion continua")
-	print("Lee el archivo:", archivo)
-	print("conecta con el servidor:", servidor.get())
+	CheckeaServidor(servidor.get())
+	cadena="TODO: Esto activa el estado de espera y configuracion continua"
+	print(cadena)
+	texto.insert("end", cadena+"\n") # Consola al inicio
+	cadena="Lee el archivo: "
+	print(cadena+archivo)
+	texto.insert("end", cadena+archivo+"\n") # Consola al inicio
+	cadena="Conecta con el servidor: "
+	print(cadena, servidor.get())
+	texto.insert("end", cadena+servidor.get()+"\n") # Consola al inicio
 	# TODO: Cambia la barra segun el archivo
 	if(bprogreso['value']>90):
 		bprogreso['value']=0
 	else:
 		bprogreso['value']=bprogreso['value']+10
-	CheckeaServidor(servidor.get())
+
 
 def CheckeaServidor(servidor):
+	"Comprueba que la ip tiene buen formato"
 	import re
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
@@ -159,6 +177,10 @@ def CheckeaServidor(servidor):
 		print ("Error ", servidor, " no es una ip")
 		return 0
 
+def BorraConsola(texto):
+	"Borra el buffer de la consola"
+	texto.delete("1.0", "end")
+	pass
 ###################################
 # Comienza el programa principal #
 ###################################
