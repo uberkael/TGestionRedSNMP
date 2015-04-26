@@ -32,25 +32,35 @@ if (len(sys.argv)>3):
 ###########################
 def setter():
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
-	f=open(archivo, 'r')
-	for line in f:
-		a=line.split()
-		if (a):
-			# TODO: setOID
-			print("Valor Anterior de", a[0], "TODO: get", a[0])
-			print("TODO: set", a[0], a[1])
+	try:
+		f=open(archivo, 'r')
+		for line in f:
+			a=line.split()
+			if (a):
+				# TODO: setOID
+				print("Valor Anterior de", a[0], "TODO: get", a[0])
+				print("TODO: set", a[0], a[1])
+	except Exception as e:
+		print("Error", e)
+	finally:
+		pass
 
 def checker():
 	"Lee el archivo linea a linea y comprueba los datos en el dispositivo"
-	f=open(archivo, 'r')
-	for line in f:
-		a=line.split()
-		if (a):
-			# TODO: getOID
-			print("Valor buscado", a[0], "=", a[1])
-			print("TODO: get", a[0], "y comprobacion")
-			# if (a[1]==" get a[0] "):
-				# print("Correcto")
+	try:
+		f=open(archivo, 'r')
+		for line in f:
+			a=line.split()
+			if (a):
+				# TODO: getOID
+				print("Valor buscado", a[0], "=", a[1])
+				print("TODO: get", a[0], "y comprobacion")
+				# if (a[1]==" get a[0] "):
+					# print("Correcto")
+	except Exception as e:
+		print("Error", e)
+	finally:
+		pass
 
 #######
 # GUI #
