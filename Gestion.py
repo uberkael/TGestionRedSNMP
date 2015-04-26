@@ -51,11 +51,13 @@ def lector(funcion):
 			a=line.split()
 			if (len(a)==2):
 				if(a[0][0]=="#"):
-					print("Error: la linea es un comentario")
+					# print("Error: la linea es un comentario")
+					pass
 				else:
 					funcion(a)
 			else:
-				print("Error: la linea es incorrecta")
+				# print("Error: la linea es incorrecta")
+				pass
 	except Exception as e:
 		print("Error", e)
 	finally:
@@ -149,7 +151,7 @@ def CheckeaServidor():
 		return 0
 
 ###################################
-# Cominenza el programa principal #
+# Comienza el programa principal #
 ###################################
 if __name__=="__main__":
 	GUITk()
