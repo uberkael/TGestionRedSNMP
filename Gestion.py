@@ -144,3 +144,4 @@ if __name__=="__main__":
 			lector(checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
+
