@@ -1,20 +1,12 @@
 #!/usr/bin/python
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
-<<<<<<< HEAD
+
 from tkinter import *			# Importa todos los objetos
 from tkinter import ttk			# Importa los themes de Tk
 from tkinter import filedialog	# Importa los dialogos y selector
 from tkinter import font		# Importa fuentes para la consola de errores
-=======
-###################
-# Biblioteca HNMP #
-###################
-# http://pysnmp.sourceforge.net/
-# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-v2c.html
-# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/set-v2c-with-value-type-mib-lookup.html
-from pysnmp.entity.rfc3413.oneliner import cmdgen
->>>>>>> 947fa51fe076b4eb0e7441e246ff2e368f4e30a3
+
 
 ######################
 # Variables globales #
@@ -214,10 +206,25 @@ def CheckeaServidor(servidor):
 		print ("Error ", servidor, " no es una ip")
 		return 0
 
+
 def BorraConsola(texto):
 	"Borra el buffer de la consola"
 	texto.delete("1.0", "end")
 	pass
+
+def geneRead(reader):
+	"Funcion auxiliar de cuentaLineas()"
+	b = reader(1024 * 1024)
+	while b:
+		yield b
+		b = reader(1024*1024)
+
+def cuentaLineas(archivo):
+	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
+	f = open(archivo, 'rb')
+	f_gen = geneRead(f.raw.read)
+	return sum( buf.count(b'\n') for buf in f_gen )
+
 ###################################
 # Comienza el programa principal #
 ###################################
@@ -225,11 +232,13 @@ if __name__=="__main__":
 	GUITk()
 	if CheckeaServidor(servidor.get()):
 		print(archivo)
+
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
 		# TODO: Conexion con el servidor
 		print ("Conexion con el servidor")
 
+		lineas=cuentaLineas(archivo)
 		# Solo comprobar
 		if (check):
 			lector(checker)
@@ -239,6 +248,4 @@ if __name__=="__main__":
 			lector(checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
-
-
 
