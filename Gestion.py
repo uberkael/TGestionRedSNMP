@@ -1,5 +1,11 @@
 #!/usr/bin/python
 import sys
+#####################
+# Biblioteca SNIMPY #
+#####################
+# http://snimpy.readthedocs.org/
+from snimpy.manager import Manager as M
+from snimpy.manager import load
 
 ######################
 # Variables globales #
@@ -40,7 +46,7 @@ if (len(sys.argv)>3):
 ###########################
 # Definicion de funciones #
 ###########################
-def lector(funcion):
+def lector(m, funcion):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	try:
 		f=open(archivo, 'r')
@@ -48,32 +54,27 @@ def lector(funcion):
 			a=line.split()
 			if (len(a)==2):
 				if(a[0][0]=="#"):
-					# print("Error: la linea es un comentario")
-					pass
+					print("Error: la linea es un comentario")
 				else:
-					funcion(a)
+					funcion(a, m)
 			else:
-				# print("Error: la linea es incorrecta")
-				pass
+				print("Error: la linea es incorrecta")
 	except Exception as e:
 		print("Error", e)
 	finally:
 		pass
 
-def setter(a):
+def setter(a, m):
 	"Escribe los datos en el dispositivo por SNMP"
-	# TODO: setOID
-	print("Valor Anterior de", a[0], "TODO: get", a[0])
-	print("TODO: set", a[0], a[1])
+	print("Valor Anterior de ", a[0], getattr(m, a[0], a[1]))
+	setattr(m, a[0], a[1])
 
 
-def checker(a):
+def checker(a, m):
 	"Comprueba los datos en el dispositivo por SNMP"
-	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
-	print("TODO: get", a[0], "y comprobacion")
-	# if (a[1]==" get a[0] "):
-		# print("Correcto")
+	if (a[1]==getattr(m, a[0])):
+		print("Correcto")
 
 ########################
 # Funciones auxiliares #
@@ -92,20 +93,21 @@ def CheckeaServidor():
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-
 	if CheckeaServidor():
-		# TODO: Carga las mibs
-		print ("Carga las mibs")
-		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
+		# Carga las mibs
+		load("mibs/RFC1155-SMI.mib")
+		load("mibs/RFC-1212.mib")
+		load("mibs/rfc1213.mib")
+		# Conexion con el servidor
+		m=M(ip, community="public", version=1)
 
 		# Solo comprobar
 		if (check):
-			lector(checker)
+			lector(m, checker)
 		# Asignar y comprobar
 		else:
-			lector(setter)
-			lector(checker)
+			lector(m, setter)
+			lector(m, checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
 
