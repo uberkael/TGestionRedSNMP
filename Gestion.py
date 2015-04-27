@@ -51,8 +51,17 @@ if (len(sys.argv)>3):
 def lector(funcion):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	try:
+		# Lineas y para barra de progreso
+		lineas=cuentaLineas(archivo)
+		porcentaje=100/lineas
+		# Lectura del archivo
 		f=open(archivo, 'r')
+		progreso=0
+		bprogreso=0
 		for line in f:
+			progreso=progreso+1
+			bprogreso=porcentaje*progreso
+			# print ("linea", progreso, bprogreso, "%")
 			a=line.split()
 			if (len(a)>=2):
 				if(a[0][0]=="#"):
@@ -142,14 +151,12 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 
-
 	if CheckeaServidor(servidor):
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
 		# TODO: Conexion con el servidor
 		print ("Conexion con el servidor")
 
-		lineas=cuentaLineas(archivo)
 		# Solo comprobar
 		if (check):
 			lector(checker)
