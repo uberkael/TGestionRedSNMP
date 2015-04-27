@@ -53,7 +53,7 @@ def lector(m, funcion):
 		f=open(archivo, 'r')
 		for line in f:
 			a=line.split()
-			if (len(a)==2):
+			if (len(a)>=2):
 				if(a[0][0]=="#"):
 					# print("Error: la linea es un comentario")
 				else:
@@ -76,7 +76,7 @@ def checker(a, m):
 	estado=0 # no errores
 	print("Valor buscado", a[0], "=", a[1])
 	print(getattr(m, a[0]))
-	if (a[1]==snmp.get(a[0])):
+	if (a[1]==getattr(m, a[0])):
 		print("Correcto")
 	else:
 		print("Error: GET ha devuelto otra cosa")
@@ -95,6 +95,19 @@ def CheckeaServidor(servidor):
 	else:
 		print ("Error ", servidor, " no es una ip")
 		return 0
+
+def geneRead(reader):
+	"Funcion auxiliar de cuentaLineas()"
+	b = reader(1024 * 1024)
+	while b:
+		yield b
+		b = reader(1024*1024)
+
+def cuentaLineas(archivo):
+	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
+	f = open(archivo, 'rb')
+	f_gen = geneRead(f.raw.read)
+	return sum( buf.count(b'\n') for buf in f_gen )
 
 ###################################
 # Comienza el programa principal #
