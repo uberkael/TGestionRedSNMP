@@ -1,13 +1,12 @@
 #!/usr/bin/python
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
-###################
-# Biblioteca HNMP #
-###################
-# http://pysnmp.sourceforge.net/
-# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-v2c.html
-# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/set-v2c-with-value-type-mib-lookup.html
-from pysnmp.entity.rfc3413.oneliner import cmdgen
+#####################
+# Biblioteca SNIMPY #
+#####################
+# http://snimpy.readthedocs.org/
+from snimpy.manager import Manager as M
+from snimpy.manager import load
 
 ######################
 # Variables globales #
@@ -48,67 +47,40 @@ if (len(sys.argv)>3):
 ###########################
 # Definicion de funciones #
 ###########################
-def lector(funcion):
+def lector(m, funcion):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	try:
 		f=open(archivo, 'r')
 		for line in f:
 			a=line.split()
-			if (len(a)>=2):
+			if (len(a)==2):
 				if(a[0][0]=="#"):
 					# print("Error: la linea es un comentario")
-					pass
 				else:
-					funcion(a)
+					funcion(a, m)
 			else:
 				# print("Error: la linea es incorrecta")
-				pass
 	except Exception as e:
 		print("Error", e)
 	finally:
 		pass
 
-def setter(a):
+def setter(a, m):
 	"Escribe los datos en el dispositivo por SNMP"
-	# TODO: setOID
-	print("Valor Anterior de", a[0], "TODO: get", a[0])
-	print("TODO: set", a[0], a[1])
+	print("Valor Anterior de ", a[0], getattr(m, a[0], a[1]))
+	setattr(m, a[0], a[1])
 
-def checker(a):
+
+def checker(a, m):
 	"Comprueba los datos en el dispositivo por SNMP"
-	# TODO: getOID
+	estado=0 # no errores
 	print("Valor buscado", a[0], "=", a[1])
-	# if (a[1]==" get a[0] "):
-	# print("Correcto")
-	cmdGen = cmdgen.CommandGenerator()
-	errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
-		cmdgen.CommunityData('public'),
-		cmdgen.UdpTransportTarget((servidor, 161)),
-		# '1.3.6.1.2.1.1.1.0', '1.3.6.1.2.1.1.6.0' TODO: Cambiar el bucle y ejecutar al final con toda la lista
-		a[0]
-		)
-	# Check for errors and print out results
-	if errorIndication:
-		print(errorIndication)
-		estado=1 # errores
+	print(getattr(m, a[0]))
+	if (a[1]==snmp.get(a[0])):
+		print("Correcto")
 	else:
-		if errorStatus:
-			print('%s at %s' % (
-				errorStatus.prettyPrint(),
-				errorIndex and varBinds[int(errorIndex)-1] or '?'
-				)
-			)
-			estado=1 # errores
-		else:
-			for name, val in varBinds:
-				print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
-				print("Valor buscado", a[0], "=", a[1])
-				if (a[1]==val.prettyPrint()):
-					print("Correcto")
-				else:
-					print("Error: GET ha devuelto otra cosa")
-					estado=1 # errores
-
+		print("Error: GET ha devuelto otra cosa")
+		estado=1 # errores
 	return estado
 
 ########################
@@ -124,39 +96,27 @@ def CheckeaServidor(servidor):
 		print ("Error ", servidor, " no es una ip")
 		return 0
 
-def geneRead(reader):
-	"Funcion auxiliar de cuentaLineas()"
-	b = reader(1024 * 1024)
-	while b:
-		yield b
-		b = reader(1024*1024)
-
-def cuentaLineas(archivo):
-	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
-	f = open(archivo, 'rb')
-	f_gen = geneRead(f.raw.read)
-	return sum( buf.count(b'\n') for buf in f_gen )
-
 ###################################
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
 
 	if CheckeaServidor(servidor):
-		# TODO: Carga las mibs
-		print ("Carga las mibs")
-		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
+		# Carga las mibs
+		load("mibs/RFC1155-SMI.mib")
+		load("mibs/RFC-1212.mib")
+		load("mibs/rfc1213.mib")
+		# Conexion con el servidor
+		m=M(ip, community="public", version=1)
 
-		lineas=cuentaLineas(archivo)
-		print(lineas, "lineas")
 		# Solo comprobar
 		if (check):
-			lector(checker)
+			lector(m, checker)
 		# Asignar y comprobar
 		else:
-			lector(setter)
-			lector(checker)
+			lector(m, setter)
+			lector(m, checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
+
 
