@@ -100,7 +100,7 @@ def CheckeaServidor(servidor):
 
 def geneRead(reader):
 	"Funcion auxiliar de cuentaLineas()"
-	b=reader(1024 * 1024)
+	b=reader(1024*1024)
 	while b:
 		yield b
 		b=reader(1024*1024)
