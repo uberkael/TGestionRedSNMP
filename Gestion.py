@@ -49,8 +49,17 @@ if (len(sys.argv)>3):
 def lector(snmp, funcion):
 	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
 	try:
+		# Lineas y para barra de progreso
+		lineas=cuentaLineas(archivo)
+		porcentaje=100/lineas
+		# Lectura del archivo
 		f=open(archivo, 'r')
+		progreso=0
+		bprogreso=0
 		for line in f:
+			progreso=progreso+1
+			bprogreso=porcentaje*progreso
+			# print ("linea", progreso, bprogreso, "%")
 			a=line.split()
 			if (len(a)==2):
 				if(a[0][0]=="#"):
@@ -120,7 +129,6 @@ if __name__=="__main__":
 		# Conexion con el servidor
 		snmp = SNMP(servidor, community="public")  # v2c
 
-		lineas=cuentaLineas(archivo)
 		# Solo comprobar
 		if (check):
 			lector(snmp, checker)
