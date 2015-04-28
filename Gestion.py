@@ -68,7 +68,7 @@ def lector(m, funcion):
 		bprogreso=0
 		for line in f:
 			if versionPy < (3, 0):	# Python2 strings no unicode
-				# line=line.encode('ascii','ignore')
+				line=line.encode('ascii','ignore') # Si hay caracteres no ASCII
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
@@ -92,7 +92,6 @@ def setter(a, m):
 	print("Valor Anterior de ", a[0], respuesta)
 	setattr(m, a[0], a[1])
 
-
 def checker(a, m):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
@@ -105,6 +104,26 @@ def checker(a, m):
 		print("Error: GET ha devuelto otra cosa")
 		estado=1 # errores
 	return estado
+
+def BuclePrincipal():
+	# TODO: verificar que hay un nuevo dispositivo
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	while (True):
+		if versionPy < (3, 0):	# Python2
+			raw_input(informacion)
+		else:
+			input(informacion)
+		if CheckeaServidor(servidor):
+			# Conexion con el servidor
+			m=M(ip, community="public", version=1)
+			# Solo comprobar
+			if (check):
+				lector(m, checker)
+			# Asignar y comprobar
+			else:
+				lector(m, setter)
+				lector(m, checker)
+		print("Fin Iteracion")
 
 ########################
 # Funciones auxiliares #
@@ -136,23 +155,11 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-
-	if CheckeaServidor(servidor):
 		# Carga las mibs
 		load("mibs/RFC1155-SMI.mib")
 		load("mibs/RFC-1212.mib")
 		load("mibs/rfc1213.mib")
-		# Conexion con el servidor
-		m=M(ip, community="public", version=1)
-
-		# Solo comprobar
-		if (check):
-			lector(m, checker)
-		# Asignar y comprobar
-		else:
-			lector(m, setter)
-			lector(m, checker)
-		# TODO: Fin->Bucle Idle
+		BuclePrincipal()
 		print("Fin")
 
 
