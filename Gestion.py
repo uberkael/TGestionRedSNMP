@@ -1,12 +1,28 @@
 #!/usr/bin/python
+from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
 
-from tkinter import *			# Importa todos los objetos
-from tkinter import ttk			# Importa los themes de Tk
-from tkinter import filedialog	# Importa los dialogos y selector
-from tkinter import font		# Importa fuentes para la consola de errores
+###########################
+# Compatibilidad Python 2 #
+###########################
+versionPy=sys.version_info
+if versionPy < (3, 0):
+	print ("Python 2")
+	from io import open # Para la lectura de fichero con opciones Python 3
 
+######
+# Tk #
+######
+if versionPy < (3, 0):
+	from Tkinter import *			# Importa todos los objetos
+	import ttk						# Importa los themes de Tk
+	import tkFont as font			# Importa fuentes para la consola de errores
+else:
+	from tkinter import *			# Importa todos los objetos
+	from tkinter import ttk			# Importa los themes de Tk
+	from tkinter import filedialog	# Importa los dialogos y selector
+	from tkinter import font		# Importa fuentes para la consola de errores
 
 ######################
 # Variables globales #
@@ -58,6 +74,9 @@ def lector(funcion):
 		progreso=0
 		bprogreso=0
 		for line in f:
+			if versionPy < (3, 0):	# Python2 strings no unicode
+				# line=line.encode('ascii','ignore')
+				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
 			# print ("linea", progreso, bprogreso, "%")
@@ -86,38 +105,9 @@ def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
+	print("TODO: get", a[0], "y comprobacion")
 	# if (a[1]==" get a[0] "):
-	# print("Correcto")
-	cmdGen = cmdgen.CommandGenerator()
-	errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
-		cmdgen.CommunityData('public'),
-		cmdgen.UdpTransportTarget((servidor, 161)),
-		# '1.3.6.1.2.1.1.1.0', '1.3.6.1.2.1.1.6.0' TODO: Cambiar el bucle y ejecutar al final con toda la lista
-		a[0]
-		)
-	# Check for errors and print out results
-	if errorIndication:
-		print(errorIndication)
-		estado=1 # errores
-	else:
-		if errorStatus:
-			print('%s at %s' % (
-				errorStatus.prettyPrint(),
-				errorIndex and varBinds[int(errorIndex)-1] or '?'
-				)
-			)
-			estado=1 # errores
-		else:
-			for name, val in varBinds:
-				print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
-				print("Valor buscado", a[0], "=", a[1])
-				if (a[1]==val.prettyPrint()):
-					print("Correcto")
-				else:
-					print("Error: GET ha devuelto otra cosa")
-					estado=1 # errores
-
-	return estado
+		# print("Correcto")
 
 #######
 # GUI #
@@ -173,6 +163,7 @@ def GUITk():
 	# Comienza el dibujo
 	root.mainloop() # Al final
 
+
 ########################
 # Funciones auxiliares #
 ########################
@@ -223,15 +214,15 @@ def BorraConsola(texto):
 
 def geneRead(reader):
 	"Funcion auxiliar de cuentaLineas()"
-	b = reader(1024 * 1024)
+	b=reader(1024*1024)
 	while b:
 		yield b
-		b = reader(1024*1024)
+		b=reader(1024*1024)
 
 def cuentaLineas(archivo):
 	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
-	f = open(archivo, 'rb')
-	f_gen = geneRead(f.raw.read)
+	f=open(archivo, 'rb')
+	f_gen=geneRead(f.raw.read)
 	return sum( buf.count(b'\n') for buf in f_gen )
 
 ###################################
@@ -255,4 +246,6 @@ if __name__=="__main__":
 			lector(checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
+
+
 
