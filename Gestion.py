@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
 ###################
@@ -8,6 +9,14 @@ import re	# Para CheckeaServidor
 # http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-v2c.html
 # http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/set-v2c-with-value-type-mib-lookup.html
 from pysnmp.entity.rfc3413.oneliner import cmdgen
+
+###########################
+# Compatibilidad Python 2 #
+###########################
+versionPy=sys.version_info
+if versionPy < (3, 0):
+	print ("Python 2")
+	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######################
 # Variables globales #
@@ -59,6 +68,9 @@ def lector(funcion):
 		progreso=0
 		bprogreso=0
 		for line in f:
+			if versionPy < (3, 0):	# Python2 strings no unicode
+				# line=line.encode('ascii','ignore')
+				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
 			# print ("linea", progreso, bprogreso, "%")
@@ -85,6 +97,7 @@ def setter(a):
 
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
+	estado=0 # no errores
 	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
 	# if (a[1]==" get a[0] "):
@@ -135,15 +148,15 @@ def CheckeaServidor(servidor):
 
 def geneRead(reader):
 	"Funcion auxiliar de cuentaLineas()"
-	b = reader(1024 * 1024)
+	b=reader(1024*1024)
 	while b:
 		yield b
-		b = reader(1024*1024)
+		b=reader(1024*1024)
 
 def cuentaLineas(archivo):
 	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
-	f = open(archivo, 'rb')
-	f_gen = geneRead(f.raw.read)
+	f=open(archivo, 'rb')
+	f_gen=geneRead(f.raw.read)
 	return sum( buf.count(b'\n') for buf in f_gen )
 
 ###################################
@@ -166,4 +179,6 @@ if __name__=="__main__":
 			lector(checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
+
+
 
