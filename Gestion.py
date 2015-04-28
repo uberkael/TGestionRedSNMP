@@ -75,7 +75,7 @@ def lector(funcion):
 		bprogreso=0
 		for line in f:
 			if versionPy < (3, 0):	# Python2 strings no unicode
-				# line=line.encode('ascii','ignore')
+				line=line.encode('ascii','ignore') # Si hay caracteres no ASCII
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
@@ -163,6 +163,27 @@ def GUITk():
 	# Comienza el dibujo
 	root.mainloop() # Al final
 
+def BuclePrincipal():
+	# TODO: verificar que hay un nuevo dispositivo
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	while (True):
+		if versionPy < (3, 0):	# Python2
+			raw_input(informacion)
+		else:
+			input(informacion)
+		# TODO: Carga las mibs
+		print ("Carga las mibs")
+		if CheckeaServidor(servidor.get()):
+			# TODO: Conexion con el servidor
+			print ("Conexion con el servidor")
+			# Solo comprobar
+			if (check):
+				lector(checker)
+			# Asignar y comprobar
+			else:
+				lector(setter)
+				lector(checker)
+		print("Fin Iteracion")
 
 ########################
 # Funciones auxiliares #
@@ -173,6 +194,7 @@ def SelecionaArchivo():
 	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
+# TODO: Fusionar TrabajaIdle con BuclePrincipal
 def TrabajaIdle(bprogreso, texto):
 	"Funcion donde debe de entrar en el bucle de configuracion"
 	# TODO: Esto activa el estado de espera y configuracion continua
@@ -230,22 +252,9 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 	GUITk()
-	if CheckeaServidor(servidor.get()):
-		print(archivo)
-		# TODO: Carga las mibs
-		print ("Carga las mibs")
-		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
-
-		# Solo comprobar
-		if (check):
-			lector(checker)
-		# Asignar y comprobar
-		else:
-			lector(setter)
-			lector(checker)
-		# TODO: Fin->Bucle Idle
-		print("Fin")
+	# Bucle principal Idle
+	BuclePrincipal()
+	print("Fin")
 
 
 
