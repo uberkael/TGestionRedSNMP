@@ -1,6 +1,15 @@
 #!/usr/bin/python
+from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
+
+###########################
+# Compatibilidad Python 2 #
+###########################
+versionPy=sys.version_info
+if versionPy < (3, 0):
+	print ("Python 2")
+	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######################
 # Variables globales #
@@ -52,11 +61,14 @@ def lector(funcion):
 		progreso=0
 		bprogreso=0
 		for line in f:
+			if versionPy < (3, 0):	# Python2 strings no unicode
+				# line=line.encode('ascii','ignore')
+				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
 			# print ("linea", progreso, bprogreso, "%")
 			a=line.split()
-			if (len(a)==2):
+			if (len(a)>=2):
 				if(a[0][0]=="#"):
 					# print("Error: la linea es un comentario")
 					pass
@@ -79,11 +91,13 @@ def setter(a):
 
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
+	estado=0 # no errores
 	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
 	print("TODO: get", a[0], "y comprobacion")
 	# if (a[1]==" get a[0] "):
 		# print("Correcto")
+	return estado
 
 ########################
 # Funciones auxiliares #
