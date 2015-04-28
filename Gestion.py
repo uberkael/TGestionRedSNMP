@@ -88,7 +88,6 @@ def setter(a):
 	print("Valor Anterior de", a[0], "TODO: get", a[0])
 	print("TODO: set", a[0], a[1])
 
-
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
@@ -98,6 +97,26 @@ def checker(a):
 	# if (a[1]==" get a[0] "):
 		# print("Correcto")
 	return estado
+
+def BuclePrincipal():
+	# TODO: verificar que hay un nuevo dispositivo
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	while (True):
+		if versionPy < (3, 0):	# Python2
+			raw_input(informacion)
+		else:
+			input(informacion)
+		if CheckeaServidor(servidor):
+			# TODO: Conexion con el servidor
+			print ("Conexion con el servidor")
+			# Solo comprobar
+			if (check):
+				lector(checker)
+			# Asignar y comprobar
+			else:
+				lector(setter)
+				lector(checker)
+		print("Fin Iteracion")
 
 ########################
 # Funciones auxiliares #
@@ -130,20 +149,10 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 
-	if CheckeaServidor(servidor):
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
-		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
-
-		# Solo comprobar
-		if (check):
-			lector(checker)
-		# Asignar y comprobar
-		else:
-			lector(setter)
-			lector(checker)
-		# TODO: Fin->Bucle Idle
+		# Bucle principal Idle
+		BuclePrincipal()
 		print("Fin")
 
 
