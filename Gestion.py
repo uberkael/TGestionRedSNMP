@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
 #####################
@@ -7,6 +8,14 @@ import re	# Para CheckeaServidor
 # http://snimpy.readthedocs.org/
 from snimpy.manager import Manager as M
 from snimpy.manager import load
+
+###########################
+# Compatibilidad Python 2 #
+###########################
+versionPy=sys.version_info
+if versionPy < (3, 0):
+	print ("Python 2")
+	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######################
 # Variables globales #
@@ -58,6 +67,9 @@ def lector(m, funcion):
 		progreso=0
 		bprogreso=0
 		for line in f:
+			if versionPy < (3, 0):	# Python2 strings no unicode
+				# line=line.encode('ascii','ignore')
+				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
 			# print ("linea", progreso, bprogreso, "%")
@@ -76,7 +88,8 @@ def lector(m, funcion):
 
 def setter(a, m):
 	"Escribe los datos en el dispositivo por SNMP"
-	print("Valor Anterior de ", a[0], getattr(m, a[0], a[1]))
+	respuesta=str(getattr(m, a[0]))
+	print("Valor Anterior de ", a[0], respuesta)
 	setattr(m, a[0], a[1])
 
 
@@ -84,8 +97,9 @@ def checker(a, m):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	print("Valor buscado", a[0], "=", a[1])
-	print(getattr(m, a[0]))
-	if (a[1]==getattr(m, a[0])):
+	respuesta=str(getattr(m, a[0]))
+	print(respuesta)
+	if (a[1]==respuesta):
 		print("Correcto")
 	else:
 		print("Error: GET ha devuelto otra cosa")
@@ -107,15 +121,15 @@ def CheckeaServidor(servidor):
 
 def geneRead(reader):
 	"Funcion auxiliar de cuentaLineas()"
-	b = reader(1024 * 1024)
+	b=reader(1024*1024)
 	while b:
 		yield b
-		b = reader(1024*1024)
+		b=reader(1024*1024)
 
 def cuentaLineas(archivo):
 	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
-	f = open(archivo, 'rb')
-	f_gen = geneRead(f.raw.read)
+	f=open(archivo, 'rb')
+	f_gen=geneRead(f.raw.read)
 	return sum( buf.count(b'\n') for buf in f_gen )
 
 ###################################
@@ -140,5 +154,6 @@ if __name__=="__main__":
 			lector(m, checker)
 		# TODO: Fin->Bucle Idle
 		print("Fin")
+
 
 
