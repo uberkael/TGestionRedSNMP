@@ -67,7 +67,7 @@ def lector(snmp, funcion):
 		bprogreso=0
 		for line in f:
 			if versionPy < (3, 0):	# Python2 strings no unicode
-				# line=line.encode('ascii','ignore')
+				line=line.encode('ascii','ignore') # Si hay caracteres no ASCII
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
@@ -106,6 +106,26 @@ def checker(snmp, a):
 		estado=1 # errores
 	return estado
 
+def BuclePrincipal():
+	# TODO: verificar que hay un nuevo dispositivo
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	while (True):
+		if versionPy < (3, 0):	# Python2
+			raw_input(informacion)
+		else:
+			input(informacion)
+		if CheckeaServidor(servidor):
+			# Conexion con el servidor
+			snmp = SNMP(servidor, community="public")  # v2c
+			# Solo comprobar
+			if (check):
+				lector(snmp, checker)
+			# Asignar y comprobar
+			else:
+				lector(snmp, setter)
+				lector(snmp, checker)
+		print("Fin Iteracion")
+
 ########################
 # Funciones auxiliares #
 ########################
@@ -136,21 +156,8 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-
-	if CheckeaServidor(servidor):
-		# TODO: Carga las mibs
-		print ("Carga las mibs")
-		# Conexion con el servidor
-		snmp = SNMP(servidor, community="public")  # v2c
-
-		# Solo comprobar
-		if (check):
-			lector(snmp, checker)
-		# Asignar y comprobar
-		else:
-			lector(snmp, setter)
-			lector(snmp, checker)
-		# TODO: Fin->Bucle Idle
+		# Bucle principal Idle
+		BuclePrincipal()
 		print("Fin")
 
 
