@@ -69,7 +69,7 @@ def lector(funcion):
 		bprogreso=0
 		for line in f:
 			if versionPy < (3, 0):	# Python2 strings no unicode
-				# line=line.encode('ascii','ignore')
+				line=line.encode('ascii','ignore') # Si hay caracteres no ASCII
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
@@ -133,6 +133,26 @@ def checker(a):
 
 	return estado
 
+def BuclePrincipal():
+	# TODO: verificar que hay un nuevo dispositivo
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	while (True):
+		if versionPy < (3, 0):	# Python2
+			raw_input(informacion)
+		else:
+			input(informacion)
+		if CheckeaServidor(servidor):
+			# TODO: Conexion con el servidor
+			print ("Conexion con el servidor")
+			# Solo comprobar
+			if (check):
+				lector(checker)
+			# Asignar y comprobar
+			else:
+				lector(setter)
+				lector(checker)
+		print("Fin Iteracion")
+
 ########################
 # Funciones auxiliares #
 ########################
@@ -164,20 +184,10 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 
-	if CheckeaServidor(servidor):
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
-		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
-
-		# Solo comprobar
-		if (check):
-			lector(checker)
-		# Asignar y comprobar
-		else:
-			lector(setter)
-			lector(checker)
-		# TODO: Fin->Bucle Idle
+		# Bucle principal Idle
+		BuclePrincipal()
 		print("Fin")
 
 
