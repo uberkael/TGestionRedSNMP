@@ -62,7 +62,7 @@ def lector(funcion):
 		bprogreso=0
 		for line in f:
 			if versionPy < (3, 0):	# Python2 strings no unicode
-				# line=line.encode('ascii','ignore')
+				line=line.encode('ascii','ignore') # Si hay caracteres no ASCII
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
