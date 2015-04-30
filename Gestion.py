@@ -106,13 +106,20 @@ def checker(a, m):
 	return estado
 
 def BuclePrincipal():
+	if (bucleactivo):
+		bucleactivo=False
+	else:
+		bucleactivo = True
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	while (True):
+
+	while (bucleactivo):
 		if versionPy < (3, 0):	# Python2
 			raw_input(informacion)
 		else:
 			input(informacion)
+		if(not bucleactivo):
+			break
 		if CheckeaServidor(servidor):
 			# Conexion con el servidor
 			m=M(ip, community="public", version=1)
@@ -159,6 +166,10 @@ if __name__=="__main__":
 		load("mibs/RFC1155-SMI.mib")
 		load("mibs/RFC-1212.mib")
 		load("mibs/rfc1213.mib")
+		bucleactivo= False
+		# TODO: Carga las mibs
+		print ("Carga las mibs")
+		# Bucle principal Idle
 		BuclePrincipal()
 		print("Fin")
 
