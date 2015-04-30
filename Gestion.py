@@ -99,13 +99,20 @@ def checker(a):
 	return estado
 
 def BuclePrincipal():
+	if (bucleactivo):
+		bucleactivo=False
+	else:
+		bucleactivo = True
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	while (True):
+
+	while (bucleactivo):
 		if versionPy < (3, 0):	# Python2
 			raw_input(informacion)
 		else:
 			input(informacion)
+		if(not bucleactivo):
+			break
 		if CheckeaServidor(servidor):
 			# TODO: Conexion con el servidor
 			print ("Conexion con el servidor")
@@ -148,7 +155,7 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-
+		bucleactivo= False
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
 		# Bucle principal Idle
