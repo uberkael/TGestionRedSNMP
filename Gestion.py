@@ -9,6 +9,7 @@ import re	# Para CheckeaServidor
 from snimpy.manager import Manager as M
 from snimpy.manager import load
 
+
 ###########################
 # Compatibilidad Python 2 #
 ###########################
@@ -16,6 +17,21 @@ versionPy=sys.version_info
 if versionPy < (3, 0):
 	print ("Python 2")
 	from io import open # Para la lectura de fichero con opciones Python 3
+
+######
+# Tk #
+######
+if versionPy < (3, 0):
+	from Tkinter import *			# Importa todos los objetos
+	import ttk						# Importa los themes de Tk
+	import tkFont as font			# Importa fuentes para la consola de errores
+	import tkFileDialog
+else:
+	import tkFileDialog
+	from tkinter import *			# Importa todos los objetos
+	from tkinter import ttk			# Importa los themes de Tk
+	from tkinter import filedialog	# Importa los dialogos y selector
+	from tkinter import font		# Importa fuentes para la consola de errores
 
 ######################
 # Variables globales #
@@ -76,11 +92,11 @@ def lector(m, funcion):
 			a=line.split()
 			if (len(a)>=2):
 				if(a[0][0]=="#"):
-					# print("Error: la linea es un comentario")
+					print("Error: la linea es un comentario")
 				else:
 					funcion(a, m)
 			else:
-				# print("Error: la linea es incorrecta")
+				print("Error: la linea es incorrecta")
 	except Exception as e:
 		print("Error", e)
 	finally:
@@ -105,7 +121,62 @@ def checker(a, m):
 		estado=1 # errores
 	return estado
 
+#######
+# GUI #
+#######
+def GUITk():
+	"Todo el entorno grafico del programa programado en Tk"
+	global servidor # Accede a la variable global para cambiar el valor
+	root = Tk()
+	root.title("Configurador")
+	## Contenedor ##
+	flame=ttk.Frame(root, borderwidth=5, relief="sunken", width=600) # Crea un frame
+	# "flat", "raised", "sunken", "solid", "ridge", or "groove".
+	# flame.configure(width=600) # Ancho del frame (Se suele ajustar automaticamente)
+	# flame.configure(height=400) # Alto del frame (Se suele ajustar automaticamente)
+	## Creacion de un menu ##
+	root.option_add('*tearOff', FALSE) # Evita que los menus sean solo una linea sin nada
+	menubar=Menu(root)
+	root['menu']=menubar
+	# Agregando menus
+	menu_file=Menu(menubar)
+	menu_edit=Menu(menubar)
+	menubar.add_cascade(menu=menu_file, label='File')
+	menubar.add_cascade(menu=menu_edit, label='Edit')
+	# TODO: Abrir archivo
+	menu_file.add_command(label='Open file...', command=SelecionaArchivo)
+	menu_file.add_separator() # ver abajo separador
+	menu_file.add_command(label='Close', command=root.destroy)
+	## Campo del servidor ##
+	abel=ttk.Label(flame, text='Servidor:')
+	aux=servidor
+	servidor=StringVar() # La variable en Tk tiene que ser un StringVar
+	servidor.set(aux) # Sustituye la variable original servidor
+	campo=ttk.Entry(flame, textvariable=servidor, width=14)
+	campo.get() # Muestra el valor de la variable usada
+	## Barra de progreso ##
+	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
+	prd.configure('maximum') # muestra el valor maximo (defecto 100)
+	prd.configure(value=10) # pone la barra a un valor
+	## Consola de errores ##
+	# una fuente de windows
+	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
+	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
+	## Boton ##
+	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: TrabajaIdle(prd, texto) ) # Crea un boton
+	## Detalles Tk ##
+	# Agrega a la ventana
+	abel.grid()		# Agrega una etiqueta de texto
+	campo.grid()	# Agrega campo de servidor
+	boton.grid()	# Agrega boton
+	prd.grid()		# Agrega barra de progreso
+	texto.grid()	# Agrega consola de errores
+	flame.grid()	# Agrega el frame
+	# Comienza el dibujo
+	root.mainloop() # Al final
+
 def BuclePrincipal():
+	global bucleactivo	
 	if (bucleactivo):
 		bucleactivo=False
 	else:
@@ -118,11 +189,17 @@ def BuclePrincipal():
 			raw_input(informacion)
 		else:
 			input(informacion)
+		# TODO: Carga las mibs
+		print ("Carga las mibs")
+		load("mibs/RFC1155-SMI.mib")
+		load("mibs/RFC-1212.mib")
+		load("mibs/rfc1213.mib")
 		if(not bucleactivo):
 			break
-		if CheckeaServidor(servidor):
-			# Conexion con el servidor
-			m=M(ip, community="public", version=1)
+		if CheckeaServidor(servidor.get()):
+			# TODO: Conexion con el servidor
+			print ("Conexion con el servidor")
+			m=M(servidor.get(), community="public", version=1)
 			# Solo comprobar
 			if (check):
 				lector(m, checker)
@@ -135,6 +212,36 @@ def BuclePrincipal():
 ########################
 # Funciones auxiliares #
 ########################
+def SelecionaArchivo():
+	#"Dialogo para seleccionar un archivo, File, New"
+	global archivo # Accede a la variable global para cambiar el valor
+	filename=tkFileDialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
+	archivo=filename
+
+# TODO: Fusionar TrabajaIdle con BuclePrincipal
+def TrabajaIdle(bprogreso, texto):
+	"Funcion donde debe de entrar en el bucle de configuracion"
+	# TODO: Esto activa el estado de espera y configuracion continua
+	cadena="TODO: Esto activa el estado de espera y configuracion continua"
+	print(cadena)
+	texto.insert("end", cadena+"\n") # Consola al inicio
+	# Comprueba los datos introducidos
+	CheckeaServidor(servidor.get(),texto)
+	cadena="TODO: Esto activa el estado de espera y configuracion continua"
+	print(cadena)
+	texto.insert("end", cadena+"\n") # Consola al inicio
+	cadena="Lee el archivo: "
+	print(cadena+archivo)
+	texto.insert("end", cadena+archivo+"\n") # Consola al inicio
+	cadena="Conecta con el servidor: "
+	print(cadena, servidor.get())
+	texto.insert("end", cadena+servidor.get()+"\n") # Consola al inicio
+	# TODO: Cambia la barra segun el archivo
+	if(bprogreso['value']>90):
+		bprogreso['value']=0
+	else:
+		bprogreso['value']=bprogreso['value']+10
+
 def CheckeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
@@ -144,6 +251,12 @@ def CheckeaServidor(servidor):
 	else:
 		print ("Error ", servidor, " no es una ip")
 		return 0
+
+
+def BorraConsola(texto):
+	"Borra el buffer de la consola"
+	texto.delete("1.0", "end")
+	pass
 
 def geneRead(reader):
 	"Funcion auxiliar de cuentaLineas()"
@@ -162,16 +275,10 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-		# Carga las mibs
-		load("mibs/RFC1155-SMI.mib")
-		load("mibs/RFC-1212.mib")
-		load("mibs/rfc1213.mib")
-		bucleactivo= False
-		# TODO: Carga las mibs
-		print ("Carga las mibs")
-		# Bucle principal Idle
-		BuclePrincipal()
-		print("Fin")
+	bucleactivo= False
+	GUITk()
+	BuclePrincipal()
+	print("Fin")
 
 
 
