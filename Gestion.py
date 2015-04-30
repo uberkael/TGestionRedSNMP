@@ -18,7 +18,9 @@ if versionPy < (3, 0):
 	from Tkinter import *			# Importa todos los objetos
 	import ttk						# Importa los themes de Tk
 	import tkFont as font			# Importa fuentes para la consola de errores
+	import tkFileDialog
 else:
+	import tkFileDialog
 	from tkinter import *			# Importa todos los objetos
 	from tkinter import ttk			# Importa los themes de Tk
 	from tkinter import filedialog	# Importa los dialogos y selector
@@ -134,7 +136,7 @@ def GUITk():
 	# TODO: Abrir archivo
 	menu_file.add_command(label='Open file...', command=SelecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
-	menu_file.add_command(label='Close', command=root.quit)
+	menu_file.add_command(label='Close', command=root.destroy)
 	## Campo del servidor ##
 	abel=ttk.Label(flame, text='Servidor:')
 	aux=servidor
@@ -189,9 +191,9 @@ def BuclePrincipal():
 # Funciones auxiliares #
 ########################
 def SelecionaArchivo():
-	"Dialogo para seleccionar un archivo, File, New"
+	#"Dialogo para seleccionar un archivo, File, New"
 	global archivo # Accede a la variable global para cambiar el valor
-	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
+	filename=tkFileDialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
 # TODO: Fusionar TrabajaIdle con BuclePrincipal
@@ -202,7 +204,7 @@ def TrabajaIdle(bprogreso, texto):
 	print(cadena)
 	texto.insert("end", cadena+"\n") # Consola al inicio
 	# Comprueba los datos introducidos
-	CheckeaServidor(servidor.get())
+	CheckeaServidor(servidor.get(),texto)
 	cadena="TODO: Esto activa el estado de espera y configuracion continua"
 	print(cadena)
 	texto.insert("end", cadena+"\n") # Consola al inicio
@@ -218,14 +220,16 @@ def TrabajaIdle(bprogreso, texto):
 	else:
 		bprogreso['value']=bprogreso['value']+10
 
-def CheckeaServidor(servidor):
+def CheckeaServidor(servidor,texto):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
 		print("Servidor correcto")
+		texto.insert("end", "Servidor correcto\n")
 		return 1
 	else:
 		print ("Error ", servidor, " no es una ip")
+		texto.insert("end", "Error "+servidor+" no es una ip\n")
 		return 0
 
 
