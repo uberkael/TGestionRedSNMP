@@ -166,15 +166,22 @@ def GUITk():
 	root.mainloop() # Al final
 
 def BuclePrincipal():
+	if (bucleactivo):
+		bucleactivo=False
+	else:
+		bucleactivo = True
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	while (True):
+
+	while (bucleactivo):
 		if versionPy < (3, 0):	# Python2
 			raw_input(informacion)
 		else:
 			input(informacion)
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
+		if(not bucleactivo):
+			break
 		if CheckeaServidor(servidor.get()):
 			# TODO: Conexion con el servidor
 			print ("Conexion con el servidor")
@@ -256,6 +263,9 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 	GUITk()
+	bucleactivo= False
+	# TODO: Carga las mibs
+	print ("Carga las mibs")
 	# Bucle principal Idle
 	BuclePrincipal()
 	print("Fin")
