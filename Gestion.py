@@ -106,10 +106,31 @@ def setter(a):
 
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
+	estado=0 # no errores
 	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
 	print("TODO: get", a[0], "y comprobacion")
 	return estado
+
+def funcionPrincipal():
+	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
+	# TODO: verificar que hay un nuevo dispositivo
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	if versionPy < (3, 0):	# Python2
+		raw_input(informacion)
+	else:
+		input(informacion)
+	if checkeaServidor(servidor.get()):
+		# TODO: Conexion con el servidor
+		print ("Conexion con el servidor")
+		# Solo comprobar
+		if (check):
+			lector(checker)
+		# Asignar y comprobar
+		else:
+			lector(setter)
+			lector(checker)
+	print("Fin Iteracion")
 
 #######
 # GUI #
@@ -164,15 +185,21 @@ def GUITk():
 	flame.grid()	# Agrega el frame
 	# Comienza el dibujo
 	root.mainloop() # Al final
+#####################
+# Funciones del GUI #
+#####################
+def selecionaArchivo():
+	"Dialogo para seleccionar un archivo, File, New"
+	global archivo # Accede a la variable global para cambiar el valor
+	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
+	archivo=filename
 
-def funcionPrincipal():
-	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
+# TODO: Fusionar trabajaIdle con BuclePrincipal
+def trabajaIdle(bprogreso, texto):
+	"La funcion que realiza el trabajo, equivalente a funcionPrincipal de consola"
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	if versionPy < (3, 0):	# Python2
-		raw_input(informacion)
-	else:
-		input(informacion)
+	texto.insert("end", informacion+"\n") # Consola al inicio
 	if checkeaServidor(servidor.get()):
 		# TODO: Conexion con el servidor
 		print ("Conexion con el servidor")
@@ -184,45 +211,29 @@ def funcionPrincipal():
 			lector(setter)
 			lector(checker)
 	print("Fin Iteracion")
-
-########################
-# Funciones auxiliares #
-########################
-def selecionaArchivo():
-	"Dialogo para seleccionar un archivo, File, New"
-	global archivo # Accede a la variable global para cambiar el valor
-	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
-	archivo=filename
-
-# TODO: Fusionar trabajaIdle con BuclePrincipal
-def trabajaIdle(bprogreso, texto):
-	"Funcion donde debe de entrar en el bucle de configuracion"
-	# TODO: Esto activa el estado de espera y configuracion continua
-	cadena="TODO: Esto activa el estado de espera y configuracion continua"
-	print(cadena)
-	texto.insert("end", cadena+"\n") # Consola al inicio
-	# Comprueba los datos introducidos
-	CheckeaServidor(servidor.get())
-	cadena="TODO: Esto activa el estado de espera y configuracion continua"
-	print(cadena)
-	texto.insert("end", cadena+"\n") # Consola al inicio
-	cadena="Lee el archivo: "
-	print(cadena+archivo)
-	texto.insert("end", cadena+archivo+"\n") # Consola al inicio
-	cadena="Conecta con el servidor: "
-	print(cadena, servidor.get())
-	texto.insert("end", cadena+servidor.get()+"\n") # Consola al inicio
-	# TODO: Cambia la barra segun el archivo
-	if(bprogreso['value']>90):
-		bprogreso['value']=0
-	else:
-		bprogreso['value']=bprogreso['value']+10
+# 	cadena="TODO: Esto activa el estado de espera y configuracion continua"
+# 	print(cadena)
+# 	texto.insert("end", cadena+"\n") # Consola al inicio
+# 	cadena="Lee el archivo: "
+# 	print(cadena+archivo)
+# 	texto.insert("end", cadena+archivo+"\n") # Consola al inicio
+# 	cadena="Conecta con el servidor: "
+# 	print(cadena, servidor.get())
+# 	texto.insert("end", cadena+servidor.get()+"\n") # Consola al inicio
+# 	# TODO: Cambia la barra segun el archivo
+# 	if(bprogreso['value']>90):
+# 		bprogreso['value']=0
+# 	else:
+# 		bprogreso['value']=bprogreso['value']+10
 
 def borraConsola(texto):
 	"Borra el buffer de la consola"
 	texto.delete("1.0", "end")
 	pass
 
+########################
+# Funciones auxiliares #
+########################
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
