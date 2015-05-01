@@ -2,9 +2,9 @@
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
 import re	# Para CheckeaServidor
-###################
-# Biblioteca HNMP #
-###################
+#####################
+# Biblioteca pySNMP #
+#####################
 # http://pysnmp.sourceforge.net/
 # http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-v2c.html
 # http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/set-v2c-with-value-type-mib-lookup.html
@@ -99,7 +99,6 @@ def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	# TODO: getOID
-	print("Valor buscado", a[0], "=", a[1])
 	# if (a[1]==" get a[0] "):
 	# print("Correcto")
 	cmdGen = cmdgen.CommandGenerator()
@@ -123,14 +122,13 @@ def checker(a):
 			estado=1 # errores
 		else:
 			for name, val in varBinds:
-				print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
 				print("Valor buscado", a[0], "=", a[1])
-				if (a[1]==val.prettyPrint()):
+				print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
+				if (a[1]==str(val)):
 					print("Correcto")
 				else:
 					print("Error: GET ha devuelto otra cosa")
 					estado=1 # errores
-
 	return estado
 
 def FuncionPrincipal():
