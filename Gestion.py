@@ -21,6 +21,7 @@ if versionPy<(3, 0):
 servidor="10.10.10.2"
 archivo='configuracion.ini'
 check=False # check, solo comprueba
+iteracion=0 # Lleva la cuenta de las maquinas
 
 ###################################
 # Argumentos en linea de comandos #
@@ -110,7 +111,11 @@ def checker(snmp, a):
 
 def funcionPrincipal(servidor):
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
-	if checkeaServidor(servidor):
+	global iteracion
+	iteracion=iteracion+1
+	cadena="Ejecutado: "+str(iteracion)
+	print (cadena)
+	if (checkeaServidor(servidor)):
 		# Conexion con el servidor
 		snmp = SNMP(servidor, community="public")  # v2c
 		# Solo comprobar
@@ -129,7 +134,7 @@ def funcionPrincipal(servidor):
 # Funciones auxiliares #
 ########################
 def funcionConsola():
-	informacion="Verificar que hay un nuevo dispositivo, pulsa Enter"
+	informacion="Conectar un nuevo dispositivo y pulsa Enter para configurarlo"
 	global servidor
 	if versionPy<(3, 0):	# Python2
 		raw_input(informacion)
