@@ -104,10 +104,16 @@ def funcionPrincipal(servidor):
 		# TODO: Conexion con el servidor
 		# Solo comprobar
 		if (check):
+			cadena="Comprobacion:"
+			print (cadena)
 			lector(checker)
 		# Asignar y comprobar
 		else:
+			cadena="Configuracion:"
+			print (cadena)
 			lector(setter)
+			cadena="Comprobacion:"
+			print (cadena)
 			lector(checker)
 		informacion="Fin Iteracion"
 	else:
