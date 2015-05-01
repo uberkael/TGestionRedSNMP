@@ -121,11 +121,21 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 	global iteracion
 	global servidor
 	global check
+	# Aumenta el numero de ejecuciones
 	iteracion=iteracion+1
 	cadena="Ejecutado: "+str(iteracion)
 	print (cadena)
 	if(texto):
 		texto.insert("end", cadena+"\n", "importante")
+	# Si hay variables del GUI, sobreescriben a las globales
+	if(servidorGUI):
+		servidor=servidorGUI
+	# truco con valor trinario
+	if(checkGUI==1):
+		check=False
+	elif (checkGUI==2):
+		check=True
+	# Trabajo
 	if (checkeaServidor(servidor)):
 		# TODO: Conexion con el servidor
 		# Solo comprobar
@@ -171,16 +181,18 @@ def GUITk():
 	# TODO: Abrir archivo
 	menu_file.add_command(label='Open file...', command=selecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
-	menu_file.add_command(label='Close', command=root.destroy)
+	menu_file.add_command(label='Close to terminal', command=root.destroy)
+	menu_file.add_command(label='Close', command=exit)
+
 	# checkbutton
-	checkGUI=StringVar()
-	menu_edit.add_checkbutton(label='Solo Check', variable=checkGUI, onvalue=True, offvalue=False)
+	checkGUI=IntVar()
+	checkGUI.set(check+1) # Truco valor trinario
+	menu_edit.add_checkbutton(label='Solo Check', variable=checkGUI, onvalue=2, offvalue=1)
 	## Campo del servidor ##
 	abel=ttk.Label(flame, text='Servidor:')
 	servidorGUI=StringVar() # La variable en Tk tiene que ser un StringVar
 	servidorGUI.set(servidor) # Sustituye la variable original servidor
 	campo=ttk.Entry(flame, textvariable=servidorGUI, width=14)
-	campo.get() # Muestra el valor de la variable usada
 	## Barra de progreso ##
 	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
 	prd.configure('maximum') # muestra el valor maximo (defecto 100)
@@ -196,7 +208,7 @@ def GUITk():
 	informacion="Verificar que hay un nuevo dispositivo, pulsa intro"
 	texto.insert("end", informacion+"\n") # Consola al inicio
 	## Boton ##
-	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), prd, texto) ) # Crea un boton
+	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) ) # Crea un boton
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid()		# Agrega una etiqueta de texto
@@ -206,7 +218,7 @@ def GUITk():
 	texto.grid()	# Agrega consola de errores
 	flame.grid()	# Agrega el frame
 	# Agrega la tecla intro como le diera al boton
-	root.bind('<Return>', lambda event: trabajaIdle(servidorGUI.get(), prd, texto))
+	root.bind('<Return>', lambda event: print (bool(checkGUI.get())) )
 	# Comienza el dibujo
 	root.mainloop() # Al final
 
@@ -224,13 +236,14 @@ def borraConsola(texto):
 	texto.delete("1.0", "end")
 	pass
 
-def trabajaIdle(servidor, prd, texto):
+def trabajaIdle(servidorGUI, checkGUI, prd, texto):
+	print(checkGUI)
 	"La funcion que realiza el trabajo en el modo grafico"
 	borraConsola(texto) # Borra el texto
 	prd.stop() # Para la animacion de la barra de progreso
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
-	cadena=funcionPrincipal(prd, texto)
+	cadena=funcionPrincipal(servidorGUI, checkGUI, prd, texto)
 	texto.insert("end", cadena+"\n", "importante")
 
 ########################
