@@ -8,7 +8,6 @@ import re	# Para checkeaServidor
 ###########################
 versionPy=sys.version_info
 if versionPy < (3, 0):
-	print ("Python 2")
 	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######
@@ -30,17 +29,11 @@ else:
 ######################
 servidor="10.10.10.2"
 archivo='configuracion.ini'
-check=False
+check=False # check, solo comprueba
 
 ###################################
 # Argumentos en linea de comandos #
 ###################################
-# Si algun argumento es check, se hace un chequeo
-# if (len(sys.argv)>1):
-# 	for x in sys.argv:
-# 		if ("check" in x.islower()):
-# 			check=True
-# Si hay segundo argumento es el servidor
 if (len(sys.argv)==2):
 	if (sys.argv[1].lower()=="check"):
 		check=True
@@ -82,47 +75,41 @@ def lector(funcion):
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
-			# print ("linea", progreso, bprogreso, "%")
 			a=line.split()
 			if (len(a)>=2):
 				if(a[0][0]=="#"):
 					# print("Error: la linea es un comentario")
 					pass
 				else:
-					funcion(a)
+					if (not funcion(a)):
+						print(a[0], a[1], "CORRECTO")
+					else:
+						print(a[0], a[1], "ERROR")
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
-		print("Error", e)
+		print("Error de lectura", e)
 	finally:
 		pass
 
 def setter(a):
 	"Escribe los datos en el dispositivo por SNMP"
 	# TODO: setOID
-	print("Valor Anterior de", a[0], "TODO: get", a[0])
-	print("TODO: set", a[0], a[1])
+	return 0 # no errores
 
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	# TODO: getOID
-	print("Valor buscado", a[0], "=", a[1])
-	print("TODO: get", a[0], "y comprobacion")
 	return estado
 
 def funcionPrincipal():
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
-	# TODO: verificar que hay un nuevo dispositivo
-	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	if versionPy < (3, 0):	# Python2
-		raw_input(informacion)
-	else:
-		input(informacion)
-	if checkeaServidor(servidor.get()):
+	print ('servidorGUI' in locals())
+		# servidor=servidorGUI.get()
+	if (checkeaServidor(servidor)):
 		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
 		# Solo comprobar
 		if (check):
 			lector(checker)
@@ -130,7 +117,10 @@ def funcionPrincipal():
 		else:
 			lector(setter)
 			lector(checker)
-	print("Fin Iteracion")
+		informacion="Fin Iteracion"
+	else:
+		informacion="Error "+servidor+" no es una ip"
+	return informacion
 
 #######
 # GUI #
@@ -160,10 +150,9 @@ def GUITk():
 	menu_file.add_command(label='Close', command=root.destroy)
 	## Campo del servidor ##
 	abel=ttk.Label(flame, text='Servidor:')
-	aux=servidor
-	servidor=StringVar() # La variable en Tk tiene que ser un StringVar
-	servidor.set(aux) # Sustituye la variable original servidor
-	campo=ttk.Entry(flame, textvariable=servidor, width=14)
+	servidorGUI=StringVar() # La variable en Tk tiene que ser un StringVar
+	servidorGUI.set(servidor) # Sustituye la variable original servidor
+	campo=ttk.Entry(flame, textvariable=servidorGUI, width=14)
 	campo.get() # Muestra el valor de la variable usada
 	## Barra de progreso ##
 	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
@@ -174,7 +163,7 @@ def GUITk():
 	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
 	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
 	## Boton ##
-	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: trabajaIdle(prd, texto) ) # Crea un boton
+	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: trabajaIdle(prd, texto, servidorGUI) ) # Crea un boton
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid()		# Agrega una etiqueta de texto
@@ -195,22 +184,12 @@ def selecionaArchivo():
 	archivo=filename
 
 # TODO: Fusionar trabajaIdle con BuclePrincipal
-def trabajaIdle(bprogreso, texto):
+def trabajaIdle(bprogreso, texto, servidorGUI):
 	"La funcion que realiza el trabajo, equivalente a funcionPrincipal de consola"
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
 	texto.insert("end", informacion+"\n") # Consola al inicio
-	if checkeaServidor(servidor.get()):
-		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
-		# Solo comprobar
-		if (check):
-			lector(checker)
-		# Asignar y comprobar
-		else:
-			lector(setter)
-			lector(checker)
-	print("Fin Iteracion")
+	funcionPrincipal()
 # 	cadena="TODO: Esto activa el estado de espera y configuracion continua"
 # 	print(cadena)
 # 	texto.insert("end", cadena+"\n") # Consola al inicio
@@ -234,14 +213,20 @@ def borraConsola(texto):
 ########################
 # Funciones auxiliares #
 ########################
+def funcionConsola():
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	if versionPy < (3, 0):	# Python2
+		raw_input(informacion)
+	else:
+		input(informacion)
+	return funcionPrincipal()
+
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
-		print("Servidor correcto")
 		return 1
 	else:
-		print ("Error ", servidor, " no es una ip")
 		return 0
 
 def geneRead(reader):
@@ -255,19 +240,16 @@ def cuentaLineas(archivo):
 	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
 	f=open(archivo, 'rb')
 	f_gen=geneRead(f.raw.read)
-	return sum( buf.count(b'\n') for buf in f_gen )
+	return sum(buf.count(b'\n') for buf in f_gen)
 
 ###################################
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
 	# TODO: Carga las mibs
-	print ("Carga las mibs")
 	GUITk()
-	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
-		funcionPrincipal()
-	print("Fin")
+		print(funcionConsola())
 
 
 
