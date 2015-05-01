@@ -126,7 +126,7 @@ def funcionPrincipal(servidor):
 # Funciones auxiliares #
 ########################
 def funcionConsola():
-	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	informacion="Verificar que hay un nuevo dispositivo, pulsa Enter"
 	global servidor
 	if versionPy < (3, 0):	# Python2
 		raw_input(informacion)
@@ -159,9 +159,9 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-		# Bucle principal Idle
-		while (True): # Solo para las interfaces de consola
-			print(funcionConsola())
+	# Bucle principal Idle
+	while (True): # Solo para las interfaces de consola
+		print(funcionConsola())
 
 
 
