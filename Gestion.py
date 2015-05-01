@@ -142,14 +142,17 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 		if (check):
 			cadena="Comprobacion:"
 			print (cadena)
+			texto.insert("end", cadena+"\n")
 			lector(checker, prd, texto)
 		# Asignar y comprobar
 		else:
 			cadena="Configuracion:"
 			print (cadena)
+			texto.insert("end", cadena+"\n")
 			lector(setter, prd, texto)
 			cadena="Comprobacion:"
 			print (cadena)
+			texto.insert("end", cadena+"\n")
 			lector(checker, prd, texto)
 		informacion="Fin Iteracion"
 	else:
