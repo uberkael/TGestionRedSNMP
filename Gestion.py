@@ -7,7 +7,7 @@ import re	# Para checkeaServidor
 # Compatibilidad Python 2 #
 ###########################
 versionPy=sys.version_info
-if versionPy < (3, 0):
+if versionPy<(3, 0):
 	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######
@@ -53,7 +53,7 @@ if (len(sys.argv)>3):
 	if (sys.argv[3].lower()=="check"):
 		check=True
 	else: # Si el tercero no es check algo esta mal
-		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
+		print("Uso:", sys.argv[0], "<servidor><archivo> [<check>]")
 		quit()
 
 ###########################
@@ -70,8 +70,8 @@ def lector(funcion, prd, texto):
 		progreso=0
 		bprogreso=0
 		for line in f:
-			if versionPy < (3, 0):	# Python2 strings no unicode
-				line=line.encode('ascii','ignore') # Si hay caracteres no ASCII
+			if versionPy<(3, 0):	# Python2 strings no unicode
+				line=line.encode('ascii', 'ignore') # Si hay caracteres no ASCII
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
@@ -93,12 +93,11 @@ def lector(funcion, prd, texto):
 						print(cadena)
 						if(texto):
 							texto.insert("end", cadena+"\n", "error")
-
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
-		cadena="Error de lectura "+ e
+		cadena="Error de lectura "+str(e)
 		print(cadena)
 		if(texto):
 			texto.insert("end", cadena+"\n", "error")
@@ -222,7 +221,7 @@ def trabajaIdle(servidor, prd, texto):
 def funcionConsola():
 	informacion="Verificar que hay un nuevo dispositivo, pulsa Enter"
 	global servidor
-	if versionPy < (3, 0):	# Python2
+	if versionPy<(3, 0):	# Python2
 		raw_input(informacion)
 	else:
 		input(informacion)
@@ -257,7 +256,8 @@ if __name__=="__main__":
 	GUITk()
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
-		print(funcionConsola())
+		cadena=funcionConsola()
+		print(cadena)
 
 
 
