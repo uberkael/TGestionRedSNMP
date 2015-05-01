@@ -133,25 +133,24 @@ def checker(a):
 
 	return estado
 
-def BuclePrincipal():
+def FuncionPrincipal():
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	while (True):
-		if versionPy < (3, 0):	# Python2
-			raw_input(informacion)
+	if versionPy < (3, 0):	# Python2
+		raw_input(informacion)
+	else:
+		input(informacion)
+	if CheckeaServidor(servidor):
+		# TODO: Conexion con el servidor
+		print ("Conexion con el servidor")
+		# Solo comprobar
+		if (check):
+			lector(checker)
+		# Asignar y comprobar
 		else:
-			input(informacion)
-		if CheckeaServidor(servidor):
-			# TODO: Conexion con el servidor
-			print ("Conexion con el servidor")
-			# Solo comprobar
-			if (check):
-				lector(checker)
-			# Asignar y comprobar
-			else:
-				lector(setter)
-				lector(checker)
-		print("Fin Iteracion")
+			lector(setter)
+			lector(checker)
+	print("Fin Iteracion")
 
 ########################
 # Funciones auxiliares #
@@ -183,11 +182,11 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
 		# Bucle principal Idle
-		BuclePrincipal()
+		while (True): # Solo para las interfaces de consola
+			FuncionPrincipal()
 		print("Fin")
 
 
