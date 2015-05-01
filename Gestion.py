@@ -59,7 +59,7 @@ if (len(sys.argv)>3):
 ###########################
 # Definicion de funciones #
 ###########################
-def lector(funcion):
+def lector(funcion, prd, texto):
 	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
 		# Lineas y para barra de progreso
@@ -75,6 +75,8 @@ def lector(funcion):
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
+			if (prd):
+				prd['value']=bprogreso
 			a=line.split()
 			if (len(a)>=2):
 				if(a[0][0]=="#"):
@@ -82,14 +84,23 @@ def lector(funcion):
 					pass
 				else:
 					if (not funcion(a)):
-						print(a[0], a[1], "CORRECTO")
+						cadena=a[0]+" "+a[1]+" CORRECTO"
+						print(cadena)
+						if(texto):
+							texto.insert("end", cadena+"\n")
 					else:
-						print(a[0], a[1], "ERROR")
+						cadena=a[0]+" "+a[1]+" ERROR"
+						print(cadena)
+						if(texto):
+							texto.insert("end", cadena+"\n")
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
-		print("Error de lectura", e)
+		cadena="Error de lectura "+ e
+		print(cadena)
+		if(texto):
+			texto.insert("end", cadena+"\n")
 	finally:
 		pass
 
@@ -104,19 +115,17 @@ def checker(a):
 	# TODO: getOID
 	return estado
 
-def funcionPrincipal(servidor):
+def funcionPrincipal(servidor, prd=False, texto=False):
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
-	print ('servidorGUI' in locals())
-		# servidor=servidorGUI.get()
 	if (checkeaServidor(servidor)):
 		# TODO: Conexion con el servidor
 		# Solo comprobar
 		if (check):
-			lector(checker)
+			lector(checker, prd, texto)
 		# Asignar y comprobar
 		else:
-			lector(setter)
-			lector(checker)
+			lector(setter, prd, texto)
+			lector(checker, prd, texto)
 		informacion="Fin Iteracion"
 	else:
 		informacion="Error "+servidor+" no es una ip"
@@ -157,13 +166,17 @@ def GUITk():
 	## Barra de progreso ##
 	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
 	prd.configure('maximum') # muestra el valor maximo (defecto 100)
-	prd.configure(value=10) # pone la barra a un valor
+	prd.configure(value=100) # pone la barra a un valor
+	prd['mode']='indeterminate'
+	prd.start()
 	## Consola de errores ##
 	# una fuente de windows
 	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
 	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
+	informacion="Verificar que hay un nuevo dispositivo, pulsa intro"
+	texto.insert("end", informacion+"\n") # Consola al inicio
 	## Boton ##
-	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: trabajaIdle(prd, texto, servidorGUI) ) # Crea un boton
+	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), prd, texto) ) # Crea un boton
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid()		# Agrega una etiqueta de texto
@@ -172,8 +185,11 @@ def GUITk():
 	prd.grid()		# Agrega barra de progreso
 	texto.grid()	# Agrega consola de errores
 	flame.grid()	# Agrega el frame
+	# Agrega la tecla intro como le diera al boton
+	root.bind('<Return>', lambda event: trabajaIdle(servidorGUI.get(), prd, texto))
 	# Comienza el dibujo
 	root.mainloop() # Al final
+
 #####################
 # Funciones del GUI #
 #####################
@@ -183,32 +199,18 @@ def selecionaArchivo():
 	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
-# TODO: Fusionar trabajaIdle con BuclePrincipal
-def trabajaIdle(bprogreso, texto, servidorGUI):
-	"La funcion que realiza el trabajo, equivalente a funcionPrincipal de consola"
-	# TODO: verificar que hay un nuevo dispositivo
-	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	texto.insert("end", informacion+"\n") # Consola al inicio
-	funcionPrincipal()
-# 	cadena="TODO: Esto activa el estado de espera y configuracion continua"
-# 	print(cadena)
-# 	texto.insert("end", cadena+"\n") # Consola al inicio
-# 	cadena="Lee el archivo: "
-# 	print(cadena+archivo)
-# 	texto.insert("end", cadena+archivo+"\n") # Consola al inicio
-# 	cadena="Conecta con el servidor: "
-# 	print(cadena, servidor.get())
-# 	texto.insert("end", cadena+servidor.get()+"\n") # Consola al inicio
-# 	# TODO: Cambia la barra segun el archivo
-# 	if(bprogreso['value']>90):
-# 		bprogreso['value']=0
-# 	else:
-# 		bprogreso['value']=bprogreso['value']+10
-
 def borraConsola(texto):
 	"Borra el buffer de la consola"
 	texto.delete("1.0", "end")
 	pass
+
+def trabajaIdle(servidor, prd, texto):
+	"La funcion que realiza el trabajo en el modo grafico"
+	borraConsola(texto) # Borra el texto
+	prd.stop() # Para la animacion de la barra de progreso
+	prd['mode']='determinate'
+	prd['value']=0 # Pone la barra de progreso a 0
+	funcionPrincipal(servidor, prd, texto)
 
 ########################
 # Funciones auxiliares #
