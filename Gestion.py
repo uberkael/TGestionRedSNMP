@@ -104,7 +104,7 @@ def checker(a):
 	# TODO: getOID
 	return estado
 
-def funcionPrincipal():
+def funcionPrincipal(servidor):
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
 	print ('servidorGUI' in locals())
 		# servidor=servidorGUI.get()
@@ -215,11 +215,12 @@ def borraConsola(texto):
 ########################
 def funcionConsola():
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	global servidor
 	if versionPy < (3, 0):	# Python2
 		raw_input(informacion)
 	else:
 		input(informacion)
-	return funcionPrincipal()
+	return funcionPrincipal(servidor)
 
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
