@@ -122,6 +122,8 @@ def funcionPrincipal(servidor, prd=False, texto=False):
 	iteracion=iteracion+1
 	cadena="Ejecutado: "+str(iteracion)
 	print (cadena)
+	if(texto):
+		texto.insert("end", cadena+"\n", "importante")
 	if (checkeaServidor(servidor)):
 		# TODO: Conexion con el servidor
 		# Solo comprobar
@@ -162,6 +164,9 @@ def GUITk():
 	menu_file.add_command(label='Open file...', command=selecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
 	menu_file.add_command(label='Close', command=root.destroy)
+	# checkbutton
+	checkGUI=StringVar()
+	menu_edit.add_checkbutton(label='Solo Check', variable=checkGUI, onvalue=True, offvalue=False)
 	## Campo del servidor ##
 	abel=ttk.Label(flame, text='Servidor:')
 	servidorGUI=StringVar() # La variable en Tk tiene que ser un StringVar
@@ -173,13 +178,13 @@ def GUITk():
 	prd.configure('maximum') # muestra el valor maximo (defecto 100)
 	prd.configure(value=100) # pone la barra a un valor
 	prd['mode']='indeterminate'
-	prd.start()
+	prd.start(15)
 	## Consola de errores ##
 	# una fuente de windows
 	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
 	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
 	texto.tag_config("error", foreground="red")
-	texto.tag_config("fin", foreground="yellow")
+	texto.tag_config("importante", foreground="yellow")
 	informacion="Verificar que hay un nuevo dispositivo, pulsa intro"
 	texto.insert("end", informacion+"\n") # Consola al inicio
 	## Boton ##
@@ -218,7 +223,7 @@ def trabajaIdle(servidor, prd, texto):
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
 	cadena=funcionPrincipal(servidor, prd, texto)
-	texto.insert("end", cadena+"\n", "fin")
+	texto.insert("end", cadena+"\n", "importante")
 
 ########################
 # Funciones auxiliares #
