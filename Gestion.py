@@ -94,9 +94,10 @@ def checker(a):
 	# TODO: getOID
 	return estado
 
-def funcionPrincipal(servidor):
+def funcionPrincipal():
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
 	global iteracion
+	global servidor
 	iteracion=iteracion+1
 	cadena="Ejecutado: "+str(iteracion)
 	print (cadena)
@@ -130,7 +131,7 @@ def funcionConsola():
 		raw_input(informacion)
 	else:
 		input(informacion)
-	return funcionPrincipal(servidor)
+	return funcionPrincipal()
 
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
