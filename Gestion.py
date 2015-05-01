@@ -92,7 +92,8 @@ def lector(funcion, prd, texto):
 						cadena=a[0]+" "+a[1]+" ERROR"
 						print(cadena)
 						if(texto):
-							texto.insert("end", cadena+"\n")
+							texto.insert("end", cadena+"\n", "error")
+
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
@@ -100,7 +101,7 @@ def lector(funcion, prd, texto):
 		cadena="Error de lectura "+ e
 		print(cadena)
 		if(texto):
-			texto.insert("end", cadena+"\n")
+			texto.insert("end", cadena+"\n", "error")
 	finally:
 		pass
 
@@ -173,6 +174,8 @@ def GUITk():
 	# una fuente de windows
 	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
 	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
+	texto.tag_config("error", foreground="red")
+	texto.tag_config("fin", foreground="yellow")
 	informacion="Verificar que hay un nuevo dispositivo, pulsa intro"
 	texto.insert("end", informacion+"\n") # Consola al inicio
 	## Boton ##
@@ -211,7 +214,7 @@ def trabajaIdle(servidor, prd, texto):
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
 	cadena=funcionPrincipal(servidor, prd, texto)
-	texto.insert("end", cadena+"\n")
+	texto.insert("end", cadena+"\n", "fin")
 
 ########################
 # Funciones auxiliares #
