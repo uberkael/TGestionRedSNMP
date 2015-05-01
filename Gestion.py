@@ -30,6 +30,7 @@ else:
 servidor="10.10.10.2"
 archivo='configuracion.ini'
 check=False # check, solo comprueba
+iteracion=0 # Lleva la cuenta de las maquinas
 
 ###################################
 # Argumentos en linea de comandos #
@@ -117,6 +118,10 @@ def checker(a):
 
 def funcionPrincipal(servidor, prd=False, texto=False):
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
+	global iteracion
+	iteracion=iteracion+1
+	cadena="Ejecutado: "+str(iteracion)
+	print (cadena)
 	if (checkeaServidor(servidor)):
 		# TODO: Conexion con el servidor
 		# Solo comprobar
@@ -219,7 +224,7 @@ def trabajaIdle(servidor, prd, texto):
 # Funciones auxiliares #
 ########################
 def funcionConsola():
-	informacion="Verificar que hay un nuevo dispositivo, pulsa Enter"
+	informacion="Conectar un nuevo dispositivo y pulsa Enter para configurarlo"
 	global servidor
 	if versionPy<(3, 0):	# Python2
 		raw_input(informacion)
