@@ -15,16 +15,15 @@ if versionPy < (3, 0):
 # Tk #
 ######
 if versionPy < (3, 0):
-	from Tkinter import *			# Importa todos los objetos
-	import ttk						# Importa los themes de Tk
-	import tkFont as font			# Importa fuentes para la consola de errores
-	import tkFileDialog
+	from Tkinter import *				# Importa todos los objetos
+	import ttk							# Importa los themes de Tk
+	import tkFileDialog as filedialog 	# Importa los dialogos y selector
+	import tkFont as font				# Importa fuentes para la consola de errores
 else:
-	import tkFileDialog
-	from tkinter import *			# Importa todos los objetos
-	from tkinter import ttk			# Importa los themes de Tk
-	from tkinter import filedialog	# Importa los dialogos y selector
-	from tkinter import font		# Importa fuentes para la consola de errores
+	from tkinter import *				# Importa todos los objetos
+	from tkinter import ttk				# Importa los themes de Tk
+	from tkinter import filedialog		# Importa los dialogos y selector
+	from tkinter import font			# Importa fuentes para la consola de errores
 
 ######################
 # Variables globales #
@@ -166,22 +165,15 @@ def GUITk():
 	root.mainloop() # Al final
 
 def BuclePrincipal():
-	if (bucleactivo):
-		bucleactivo=False
-	else:
-		bucleactivo = True
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-
-	while (bucleactivo):
+	while (True):
 		if versionPy < (3, 0):	# Python2
 			raw_input(informacion)
 		else:
 			input(informacion)
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
-		if(not bucleactivo):
-			break
 		if CheckeaServidor(servidor.get()):
 			# TODO: Conexion con el servidor
 			print ("Conexion con el servidor")
@@ -198,9 +190,9 @@ def BuclePrincipal():
 # Funciones auxiliares #
 ########################
 def SelecionaArchivo():
-	#"Dialogo para seleccionar un archivo, File, New"
+	"Dialogo para seleccionar un archivo, File, New"
 	global archivo # Accede a la variable global para cambiar el valor
-	filename=tkFileDialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
+	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
 # TODO: Fusionar TrabajaIdle con BuclePrincipal
@@ -211,7 +203,7 @@ def TrabajaIdle(bprogreso, texto):
 	print(cadena)
 	texto.insert("end", cadena+"\n") # Consola al inicio
 	# Comprueba los datos introducidos
-	CheckeaServidor(servidor.get(),texto)
+	CheckeaServidor(servidor.get())
 	cadena="TODO: Esto activa el estado de espera y configuracion continua"
 	print(cadena)
 	texto.insert("end", cadena+"\n") # Consola al inicio
@@ -227,16 +219,14 @@ def TrabajaIdle(bprogreso, texto):
 	else:
 		bprogreso['value']=bprogreso['value']+10
 
-def CheckeaServidor(servidor,texto):
+def CheckeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
 		print("Servidor correcto")
-		texto.insert("end", "Servidor correcto\n")
 		return 1
 	else:
 		print ("Error ", servidor, " no es una ip")
-		texto.insert("end", "Error "+servidor+" no es una ip\n")
 		return 0
 
 
@@ -263,9 +253,6 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 	GUITk()
-	bucleactivo= False
-	# TODO: Carga las mibs
-	print ("Carga las mibs")
 	# Bucle principal Idle
 	BuclePrincipal()
 	print("Fin")
