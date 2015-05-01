@@ -73,7 +73,9 @@ def lector(funcion):
 					# print("Error: la linea es un comentario")
 					pass
 				else:
-					funcion(a)
+					if (not funcion(a)):
+						print(a[0], a[1], "CORRECTO")
+
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
@@ -85,16 +87,12 @@ def lector(funcion):
 def setter(a):
 	"Escribe los datos en el dispositivo por SNMP"
 	# TODO: setOID
-	print("Valor Anterior de", a[0], "TODO: get", a[0]) # print para eliminar TODO
-	print("TODO: set", a[0], a[1]) # print para eliminar TODO
 	return 0 # no errores
 
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	# TODO: getOID
-	print("Valor buscado", a[0], "=", a[1])  # print para eliminar TODO
-	print("TODO: get", a[0], "y comprobacion")  # print para eliminar TODO
 	return estado
 
 def funcionPrincipal():
