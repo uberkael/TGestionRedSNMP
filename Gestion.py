@@ -113,6 +113,7 @@ def funcionPrincipal():
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
 	global iteracion
 	global servidor
+	global check
 	iteracion=iteracion+1
 	cadena="Ejecutado: "+str(iteracion)
 	print (cadena)
