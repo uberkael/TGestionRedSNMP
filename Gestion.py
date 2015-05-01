@@ -106,25 +106,24 @@ def checker(snmp, a):
 		estado=1 # errores
 	return estado
 
-def BuclePrincipal():
+def FuncionPrincipal():
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	while (True):
-		if versionPy < (3, 0):	# Python2
-			raw_input(informacion)
+	if versionPy < (3, 0):	# Python2
+		raw_input(informacion)
+	else:
+		input(informacion)
+	if CheckeaServidor(servidor):
+		# Conexion con el servidor
+		snmp = SNMP(servidor, community="public")  # v2c
+		# Solo comprobar
+		if (check):
+			lector(snmp, checker)
+		# Asignar y comprobar
 		else:
-			input(informacion)
-		if CheckeaServidor(servidor):
-			# Conexion con el servidor
-			snmp = SNMP(servidor, community="public")  # v2c
-			# Solo comprobar
-			if (check):
-				lector(snmp, checker)
-			# Asignar y comprobar
-			else:
-				lector(snmp, setter)
-				lector(snmp, checker)
-		print("Fin Iteracion")
+			lector(snmp, setter)
+			lector(snmp, checker)
+	print("Fin Iteracion")
 
 ########################
 # Funciones auxiliares #
@@ -157,7 +156,8 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 		# Bucle principal Idle
-		BuclePrincipal()
+		while (True): # Solo para las interfaces de consola
+			FuncionPrincipal()
 		print("Fin")
 
 
