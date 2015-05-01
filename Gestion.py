@@ -119,11 +119,17 @@ def funcionPrincipal(servidor):
 		m=M(ip, community="public", version=1)
 		# Solo comprobar
 		if (check):
+			cadena="Comprobacion:"
+			print (cadena)
 			lector(m, checker)
 		# Asignar y comprobar
 		else:
-			lector(m, setter)
+			cadena="Configuracion:"
+			print (cadena)
 			lector(m, checker)
+			cadena="Comprobacion:"
+			print (cadena)
+			lector(m, setter)
 		informacion="Fin Iteracion"
 	else:
 		informacion="Error "+servidor+" no es una ip"
