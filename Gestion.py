@@ -15,17 +15,11 @@ if versionPy < (3, 0):
 ######################
 servidor="10.10.10.2"
 archivo='configuracion.ini'
-check=False
+check=False # check, solo comprueba
 
 ###################################
 # Argumentos en linea de comandos #
 ###################################
-# Si algun argumento es check, se hace un chequeo
-# if (len(sys.argv)>1):
-# 	for x in sys.argv:
-# 		if ("check" in x.islower()):
-# 			check=True
-# Si hay segundo argumento es el servidor
 if (len(sys.argv)==2):
 	if (sys.argv[1].lower()=="check"):
 		check=True
@@ -75,12 +69,13 @@ def lector(funcion):
 				else:
 					if (not funcion(a)):
 						print(a[0], a[1], "CORRECTO")
-
+					else:
+						print(a[0], a[1], "ERROR")
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
-		print("Error", e)
+		print("Error de lectura", e)
 	finally:
 		pass
 
@@ -97,12 +92,6 @@ def checker(a):
 
 def funcionPrincipal():
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
-	# TODO: verificar que hay un nuevo dispositivo
-	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	if versionPy < (3, 0):	# Python2
-		raw_input(informacion)
-	else:
-		input(informacion)
 	if (checkeaServidor(servidor)):
 		# TODO: Conexion con el servidor
 		# Solo comprobar
@@ -120,6 +109,14 @@ def funcionPrincipal():
 ########################
 # Funciones auxiliares #
 ########################
+def funcionConsola():
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	if versionPy < (3, 0):	# Python2
+		raw_input(informacion)
+	else:
+		input(informacion)
+	return funcionPrincipal()
+
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
@@ -139,7 +136,7 @@ def cuentaLineas(archivo):
 	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
 	f=open(archivo, 'rb')
 	f_gen=geneRead(f.raw.read)
-	return sum( buf.count(b'\n') for buf in f_gen )
+	return sum(buf.count(b'\n') for buf in f_gen)
 
 ###################################
 # Comienza el programa principal #
@@ -148,7 +145,7 @@ if __name__=="__main__":
 		# TODO: Carga las mibs
 		# Bucle principal Idle
 		while (True): # Solo para las interfaces de consola
-			print(funcionPrincipal())
+			print(funcionConsola())
 
 
 
