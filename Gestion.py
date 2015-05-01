@@ -120,10 +120,16 @@ def funcionPrincipal(servidor):
 		snmp = SNMP(servidor, community="public")  # v2c
 		# Solo comprobar
 		if (check):
+			cadena="Comprobacion:"
+			print (cadena)
 			lector(snmp, checker)
 		# Asignar y comprobar
 		else:
+			cadena="Configuracion:"
+			print (cadena)
 			lector(snmp, setter)
+			cadena="Comprobacion:"
+			print (cadena)
 			lector(snmp, checker)
 		informacion="Fin Iteracion"
 	else:
