@@ -210,7 +210,8 @@ def trabajaIdle(servidor, prd, texto):
 	prd.stop() # Para la animacion de la barra de progreso
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
-	funcionPrincipal(servidor, prd, texto)
+	cadena=funcionPrincipal(servidor, prd, texto)
+	texto.insert("end", cadena+"\n")
 
 ########################
 # Funciones auxiliares #
