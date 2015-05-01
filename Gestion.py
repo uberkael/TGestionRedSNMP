@@ -142,17 +142,20 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 		if (check):
 			cadena="Comprobacion:"
 			print (cadena)
-			texto.insert("end", cadena+"\n")
+			if(texto):
+				texto.insert("end", cadena+"\n", "importante")
 			lector(checker, prd, texto)
 		# Asignar y comprobar
 		else:
 			cadena="Configuracion:"
 			print (cadena)
-			texto.insert("end", cadena+"\n")
+			if(texto):
+				texto.insert("end", cadena+"\n", "importante")
 			lector(setter, prd, texto)
 			cadena="Comprobacion:"
 			print (cadena)
-			texto.insert("end", cadena+"\n")
+			if(texto):
+				texto.insert("end", cadena+"\n", "importante")
 			lector(checker, prd, texto)
 		informacion="Fin Iteracion"
 	else:
@@ -163,7 +166,7 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 # GUI #
 #######
 def GUITk():
-	"Todo el entorno grafico del programa programado en Tk"
+	"Todo el entorno grafico programado en Tk"
 	global servidor # Accede a la variable global para cambiar el valor
 	root = Tk()
 	root.title("Configurador")
@@ -212,13 +215,17 @@ def GUITk():
 	texto.insert("end", informacion+"\n") # Consola al inicio
 	## Boton ##
 	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) ) # Crea un boton
+	# Scrollbar
+	sbv=ttk.Scrollbar(flame, orient=VERTICAL, command=texto.yview)
 	## Detalles Tk ##
 	# Agrega a la ventana
-	abel.grid()		# Agrega una etiqueta de texto
-	campo.grid()	# Agrega campo de servidor
-	boton.grid()	# Agrega boton
-	prd.grid()		# Agrega barra de progreso
-	texto.grid()	# Agrega consola de errores
+	abel.grid(column=0, row=0)	# Agrega una etiqueta de texto
+	campo.grid(column=0, row=1)	# Agrega campo de servidor
+	boton.grid(column=0, row=2)	# Agrega boton
+	prd.grid(column=0, row=3)	# Agrega barra de progreso
+	texto.grid(column=0, row=4)	# Agrega consola de errores
+	sbv.grid(column=1, row=4, sticky=(N, S))
+	texto['yscrollcommand']=sbv.set
 	flame.grid()	# Agrega el frame
 	# Agrega la tecla intro como le diera al boton
 	root.bind('<Return>', lambda event: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) )
