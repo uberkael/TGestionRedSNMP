@@ -116,9 +116,10 @@ def checker(a):
 	# TODO: getOID
 	return estado
 
-def funcionPrincipal(servidor, prd=False, texto=False):
+def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
 	global iteracion
+	global servidor
 	iteracion=iteracion+1
 	cadena="Ejecutado: "+str(iteracion)
 	print (cadena)
@@ -128,10 +129,16 @@ def funcionPrincipal(servidor, prd=False, texto=False):
 		# TODO: Conexion con el servidor
 		# Solo comprobar
 		if (check):
+			cadena="Comprobacion:"
+			print (cadena)
 			lector(checker, prd, texto)
 		# Asignar y comprobar
 		else:
+			cadena="Configuracion:"
+			print (cadena)
 			lector(setter, prd, texto)
+			cadena="Comprobacion:"
+			print (cadena)
 			lector(checker, prd, texto)
 		informacion="Fin Iteracion"
 	else:
@@ -222,7 +229,7 @@ def trabajaIdle(servidor, prd, texto):
 	prd.stop() # Para la animacion de la barra de progreso
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
-	cadena=funcionPrincipal(servidor, prd, texto)
+	cadena=funcionPrincipal(prd, texto)
 	texto.insert("end", cadena+"\n", "importante")
 
 ########################
@@ -235,7 +242,7 @@ def funcionConsola():
 		raw_input(informacion)
 	else:
 		input(informacion)
-	return funcionPrincipal(servidor)
+	return funcionPrincipal()
 
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
