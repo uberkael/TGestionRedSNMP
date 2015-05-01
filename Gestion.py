@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
-import re	# Para CheckeaServidor
+import re	# Para checkeaServidor
 
 ###########################
 # Compatibilidad Python 2 #
@@ -28,30 +28,32 @@ check=False
 # 			check=True
 # Si hay segundo argumento es el servidor
 if (len(sys.argv)==2):
-	if sys.argv[1]=="check":
+	if (sys.argv[1].lower()=="check"):
 		check=True
 	else:
 		servidor=sys.argv[1]
 # Si hay tres argumentos es el servidor y un archivo
 if (len(sys.argv)==3):
 	servidor=sys.argv[1]
-	if sys.argv[2]=="check":
+	if (sys.argv[2].lower()=="check"):
 		check=True
 	else:
 		archivo=sys.argv[2]
+# Si hay mas de tres argumentos es el servidor y un archivo y check
 if (len(sys.argv)>3):
 	servidor=sys.argv[1]
 	archivo=sys.argv[2]
-	if sys.argv[2]=="check":
+	if (sys.argv[3].lower()=="check"):
 		check=True
-	else:
+	else: # Si el tercero no es check algo esta mal
 		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
+		quit()
 
 ###########################
 # Definicion de funciones #
 ###########################
 def lector(funcion):
-	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
+	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
 		# Lineas y para barra de progreso
 		lineas=cuentaLineas(archivo)
@@ -94,18 +96,17 @@ def checker(a):
 	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
 	print("TODO: get", a[0], "y comprobacion")
-	# if (a[1]==" get a[0] "):
-		# print("Correcto")
 	return estado
 
-def FuncionPrincipal():
+def funcionPrincipal():
+	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
 	if versionPy < (3, 0):	# Python2
 		raw_input(informacion)
 	else:
 		input(informacion)
-	if CheckeaServidor(servidor):
+	if checkeaServidor(servidor):
 		# TODO: Conexion con el servidor
 		print ("Conexion con el servidor")
 		# Solo comprobar
@@ -120,7 +121,7 @@ def FuncionPrincipal():
 ########################
 # Funciones auxiliares #
 ########################
-def CheckeaServidor(servidor):
+def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
@@ -151,7 +152,7 @@ if __name__=="__main__":
 		print ("Carga las mibs")
 		# Bucle principal Idle
 		while (True): # Solo para las interfaces de consola
-			FuncionPrincipal()
+			funcionPrincipal()
 		print("Fin")
 
 
