@@ -77,7 +77,8 @@ def lector(funcion, prd, texto):
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
 			if (prd):
-				prd['value']=bprogreso
+				prd['value']=bprogreso # Nuevo valor de progreso
+				prd.update_idletasks() # Actualiza la barra
 			a=line.split()
 			if (len(a)>=2):
 				if(a[0][0]=="#"):
@@ -202,7 +203,7 @@ def GUITk():
 	## Barra de progreso ##
 	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
 	prd.configure('maximum') # muestra el valor maximo (defecto 100)
-	prd.configure(value=100) # pone la barra a un valor
+	prd.configure(value=1) # pone la barra a un valor
 	prd['mode']='indeterminate'
 	prd.start(15)
 	## Consola de errores ##
@@ -253,6 +254,7 @@ def trabajaIdle(servidorGUI, checkGUI, prd, texto):
 	prd.stop() # Para la animacion de la barra de progreso
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
+	prd.update_idletasks() # Actualiza la barra
 	cadena=funcionPrincipal(servidorGUI, checkGUI, prd, texto)
 	texto.insert("end", cadena+"\n", "importante")
 
