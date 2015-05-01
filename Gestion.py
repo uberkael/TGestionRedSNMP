@@ -12,7 +12,7 @@ from hnmp import SNMP
 # Compatibilidad Python 2 #
 ###########################
 versionPy=sys.version_info
-if versionPy < (3, 0):
+if versionPy<(3, 0):
 	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######################
@@ -44,7 +44,7 @@ if (len(sys.argv)>3):
 	if (sys.argv[3].lower()=="check"):
 		check=True
 	else: # Si el tercero no es check algo esta mal
-		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
+		print("Uso:", sys.argv[0], "<servidor><archivo> [<check>]")
 		quit()
 
 ###########################
@@ -61,8 +61,8 @@ def lector(snmp, funcion):
 		progreso=0
 		bprogreso=0
 		for line in f:
-			if versionPy < (3, 0):	# Python2 strings no unicode
-				line=line.encode('ascii','ignore') # Si hay caracteres no ASCII
+			if versionPy<(3, 0):	# Python2 strings no unicode
+				line=line.encode('ascii', 'ignore') # Si hay caracteres no ASCII
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
@@ -73,14 +73,17 @@ def lector(snmp, funcion):
 					pass
 				else:
 					if (not funcion(snmp,a)):
-						print(a[0], a[1], "CORRECTO")
+						cadena=a[0]+" "+a[1]+" CORRECTO"
+						print(cadena)
 					else:
-						print(a[0], a[1], "ERROR")
+						cadena=a[0]+" "+a[1]+" ERROR"
+						print(cadena)
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
-		print("Error de lectura", e)
+		cadena="Error de lectura "+str(e)
+		print(cadena)
 	finally:
 		pass
 
@@ -128,7 +131,7 @@ def funcionPrincipal(servidor):
 def funcionConsola():
 	informacion="Verificar que hay un nuevo dispositivo, pulsa Enter"
 	global servidor
-	if versionPy < (3, 0):	# Python2
+	if versionPy<(3, 0):	# Python2
 		raw_input(informacion)
 	else:
 		input(informacion)
@@ -161,7 +164,8 @@ def cuentaLineas(archivo):
 if __name__=="__main__":
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
-		print(funcionConsola())
+		cadena=funcionConsola()
+		print(cadena)
 
 
 
