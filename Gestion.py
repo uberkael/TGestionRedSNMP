@@ -217,6 +217,7 @@ def GUITk():
 	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) ) # Crea un boton
 	# Scrollbar
 	sbv=ttk.Scrollbar(flame, orient=VERTICAL, command=texto.yview)
+	texto['yscrollcommand']=sbv.set
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid(column=0, row=0)	# Agrega una etiqueta de texto
@@ -225,7 +226,6 @@ def GUITk():
 	prd.grid(column=0, row=3)	# Agrega barra de progreso
 	texto.grid(column=0, row=4)	# Agrega consola de errores
 	sbv.grid(column=1, row=4, sticky=(N, S))
-	texto['yscrollcommand']=sbv.set
 	flame.grid()	# Agrega el frame
 	# Agrega la tecla intro como le diera al boton
 	root.bind('<Return>', lambda event: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) )
@@ -238,8 +238,9 @@ def GUITk():
 def selecionaArchivo():
 	"Dialogo para seleccionar un archivo, File, New"
 	global archivo # Accede a la variable global para cambiar el valor
-	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
-	archivo=filename
+	filename=filedialog.askopenfilename(initialfile="configuracion.ini", filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
+	if(filename):
+		archivo=filename
 
 def borraConsola(texto):
 	"Borra el buffer de la consola"
