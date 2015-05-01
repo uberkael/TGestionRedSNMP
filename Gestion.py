@@ -218,7 +218,7 @@ def GUITk():
 	texto.grid()	# Agrega consola de errores
 	flame.grid()	# Agrega el frame
 	# Agrega la tecla intro como le diera al boton
-	root.bind('<Return>', lambda event: print (bool(checkGUI.get())) )
+	root.bind('<Return>', lambda event: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) )
 	# Comienza el dibujo
 	root.mainloop() # Al final
 
@@ -237,7 +237,6 @@ def borraConsola(texto):
 	pass
 
 def trabajaIdle(servidorGUI, checkGUI, prd, texto):
-	print(checkGUI)
 	"La funcion que realiza el trabajo en el modo grafico"
 	borraConsola(texto) # Borra el texto
 	prd.stop() # Para la animacion de la barra de progreso
