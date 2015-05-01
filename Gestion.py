@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
-import re	# Para CheckeaServidor
+import re	# Para checkeaServidor
 
 ###########################
 # Compatibilidad Python 2 #
@@ -42,30 +42,32 @@ check=False
 # 			check=True
 # Si hay segundo argumento es el servidor
 if (len(sys.argv)==2):
-	if sys.argv[1]=="check":
+	if (sys.argv[1].lower()=="check"):
 		check=True
 	else:
 		servidor=sys.argv[1]
 # Si hay tres argumentos es el servidor y un archivo
 if (len(sys.argv)==3):
 	servidor=sys.argv[1]
-	if sys.argv[2]=="check":
+	if (sys.argv[2].lower()=="check"):
 		check=True
 	else:
 		archivo=sys.argv[2]
+# Si hay mas de tres argumentos es el servidor y un archivo y check
 if (len(sys.argv)>3):
 	servidor=sys.argv[1]
 	archivo=sys.argv[2]
-	if sys.argv[2]=="check":
+	if (sys.argv[3].lower()=="check"):
 		check=True
-	else:
+	else: # Si el tercero no es check algo esta mal
 		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
+		quit()
 
 ###########################
 # Definicion de funciones #
 ###########################
 def lector(funcion):
-	"Lee el archivo linea a linea y escribe los datos en el dispositivo"
+	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
 		# Lineas y para barra de progreso
 		lineas=cuentaLineas(archivo)
@@ -107,8 +109,7 @@ def checker(a):
 	# TODO: getOID
 	print("Valor buscado", a[0], "=", a[1])
 	print("TODO: get", a[0], "y comprobacion")
-	# if (a[1]==" get a[0] "):
-		# print("Correcto")
+	return estado
 
 #######
 # GUI #
@@ -133,7 +134,7 @@ def GUITk():
 	menubar.add_cascade(menu=menu_file, label='File')
 	menubar.add_cascade(menu=menu_edit, label='Edit')
 	# TODO: Abrir archivo
-	menu_file.add_command(label='Open file...', command=SelecionaArchivo)
+	menu_file.add_command(label='Open file...', command=selecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
 	menu_file.add_command(label='Close', command=root.destroy)
 	## Campo del servidor ##
@@ -152,7 +153,7 @@ def GUITk():
 	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
 	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
 	## Boton ##
-	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: TrabajaIdle(prd, texto) ) # Crea un boton
+	boton=ttk.Button(flame, text="Boton", width=60, command=lambda: trabajaIdle(prd, texto) ) # Crea un boton
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid()		# Agrega una etiqueta de texto
@@ -164,14 +165,15 @@ def GUITk():
 	# Comienza el dibujo
 	root.mainloop() # Al final
 
-def FuncionPrincipal():
+def funcionPrincipal():
+	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
 	if versionPy < (3, 0):	# Python2
 		raw_input(informacion)
 	else:
 		input(informacion)
-	if CheckeaServidor(servidor.get()):
+	if checkeaServidor(servidor.get()):
 		# TODO: Conexion con el servidor
 		print ("Conexion con el servidor")
 		# Solo comprobar
@@ -186,14 +188,14 @@ def FuncionPrincipal():
 ########################
 # Funciones auxiliares #
 ########################
-def SelecionaArchivo():
+def selecionaArchivo():
 	"Dialogo para seleccionar un archivo, File, New"
 	global archivo # Accede a la variable global para cambiar el valor
 	filename=filedialog.askopenfilename(filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
 	archivo=filename
 
-# TODO: Fusionar TrabajaIdle con BuclePrincipal
-def TrabajaIdle(bprogreso, texto):
+# TODO: Fusionar trabajaIdle con BuclePrincipal
+def trabajaIdle(bprogreso, texto):
 	"Funcion donde debe de entrar en el bucle de configuracion"
 	# TODO: Esto activa el estado de espera y configuracion continua
 	cadena="TODO: Esto activa el estado de espera y configuracion continua"
@@ -216,7 +218,12 @@ def TrabajaIdle(bprogreso, texto):
 	else:
 		bprogreso['value']=bprogreso['value']+10
 
-def CheckeaServidor(servidor):
+def borraConsola(texto):
+	"Borra el buffer de la consola"
+	texto.delete("1.0", "end")
+	pass
+
+def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
@@ -225,12 +232,6 @@ def CheckeaServidor(servidor):
 	else:
 		print ("Error ", servidor, " no es una ip")
 		return 0
-
-
-def BorraConsola(texto):
-	"Borra el buffer de la consola"
-	texto.delete("1.0", "end")
-	pass
 
 def geneRead(reader):
 	"Funcion auxiliar de cuentaLineas()"
@@ -254,7 +255,7 @@ if __name__=="__main__":
 	GUITk()
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
-		FuncionPrincipal()
+		funcionPrincipal()
 	print("Fin")
 
 
