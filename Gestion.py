@@ -13,7 +13,6 @@ from hnmp import SNMP
 ###########################
 versionPy=sys.version_info
 if versionPy < (3, 0):
-	print ("Python 2")
 	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######################
@@ -21,17 +20,11 @@ if versionPy < (3, 0):
 ######################
 servidor="10.10.10.2"
 archivo='configuracion.ini'
-check=False
+check=False # check, solo comprueba
 
 ###################################
 # Argumentos en linea de comandos #
 ###################################
-# Si algun argumento es check, se hace un chequeo
-# if (len(sys.argv)>1):
-# 	for x in sys.argv:
-# 		if ("check" in x.islower()):
-# 			check=True
-# Si hay segundo argumento es el servidor
 if (len(sys.argv)==2):
 	if (sys.argv[1].lower()=="check"):
 		check=True
@@ -73,49 +66,47 @@ def lector(snmp, funcion):
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
-			# print ("linea", progreso, bprogreso, "%")
 			a=line.split()
 			if (len(a)>=2):
 				if(a[0][0]=="#"):
 					# print("Error: la linea es un comentario")
 					pass
 				else:
-					funcion(snmp, a)
+					if (not funcion(snmp,a)):
+						print(a[0], a[1], "CORRECTO")
+					else:
+						print(a[0], a[1], "ERROR")
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
-		print("Error", e)
+		print("Error de lectura", e)
 	finally:
 		pass
 
 def setter(snmp, a):
 	"Escribe los datos en el dispositivo por SNMP"
-	respuesta=str(snmp.get(a[0]))
-	print("Valor Anterior de", a[0], respuesta)
+	# respuesta=str(snmp.get(a[0]))
+	# print("Valor Anterior de", a[0], respuesta)
 	snmp.set(a[0], a[1])
+	return 0 # no errores
 
 def checker(snmp, a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
-	print("Valor buscado", a[0], "=", a[1])
+	# print("Valor buscado", a[0], "=", a[1])
 	respuesta=str(snmp.get(a[0]))
-	print(respuesta)
+	# print(respuesta)
 	if (a[1]==respuesta):
-		print("Correcto")
+		# print("Correcto")
+		pass # sin errores
 	else:
-		print("Error: GET ha devuelto otra cosa")
+		# print("Error: GET ha devuelto otra cosa")
 		estado=1 # errores
 	return estado
 
 def funcionPrincipal():
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
-	# TODO: verificar que hay un nuevo dispositivo
-	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-	if versionPy < (3, 0):	# Python2
-		raw_input(informacion)
-	else:
-		input(informacion)
 	if checkeaServidor(servidor):
 		# Conexion con el servidor
 		snmp = SNMP(servidor, community="public")  # v2c
@@ -126,19 +117,28 @@ def funcionPrincipal():
 		else:
 			lector(snmp, setter)
 			lector(snmp, checker)
-	print("Fin Iteracion")
+		informacion="Fin Iteracion"
+	else:
+		informacion="Error "+servidor+" no es una ip"
+	return informacion
 
 ########################
 # Funciones auxiliares #
 ########################
+def funcionConsola():
+	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
+	if versionPy < (3, 0):	# Python2
+		raw_input(informacion)
+	else:
+		input(informacion)
+	return funcionPrincipal()
+
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
-		print("Servidor correcto")
 		return 1
 	else:
-		print ("Error ", servidor, " no es una ip")
 		return 0
 
 def geneRead(reader):
@@ -152,7 +152,7 @@ def cuentaLineas(archivo):
 	"Lector rapido de numero de lineas http://stackoverflow.com/a/27518377/3052862"
 	f=open(archivo, 'rb')
 	f_gen=geneRead(f.raw.read)
-	return sum( buf.count(b'\n') for buf in f_gen )
+	return sum(buf.count(b'\n') for buf in f_gen)
 
 ###################################
 # Comienza el programa principal #
@@ -160,8 +160,7 @@ def cuentaLineas(archivo):
 if __name__=="__main__":
 		# Bucle principal Idle
 		while (True): # Solo para las interfaces de consola
-			funcionPrincipal()
-		print("Fin")
+			print(funcionConsola())
 
 
 
