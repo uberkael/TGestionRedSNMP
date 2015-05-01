@@ -105,32 +105,24 @@ def checker(a, m):
 		estado=1 # errores
 	return estado
 
-def BuclePrincipal():
-	if (bucleactivo):
-		bucleactivo=False
-	else:
-		bucleactivo = True
+def FuncionPrincipal():
 	# TODO: verificar que hay un nuevo dispositivo
 	informacion="TODO: verificar que hay un nuevo dispositivo, pulsa intro"
-
-	while (bucleactivo):
-		if versionPy < (3, 0):	# Python2
-			raw_input(informacion)
+	if versionPy < (3, 0):	# Python2
+		raw_input(informacion)
+	else:
+		input(informacion)
+	if CheckeaServidor(servidor):
+		# Conexion con el servidor
+		m=M(ip, community="public", version=1)
+		# Solo comprobar
+		if (check):
+			lector(m, checker)
+		# Asignar y comprobar
 		else:
-			input(informacion)
-		if(not bucleactivo):
-			break
-		if CheckeaServidor(servidor):
-			# Conexion con el servidor
-			m=M(ip, community="public", version=1)
-			# Solo comprobar
-			if (check):
-				lector(m, checker)
-			# Asignar y comprobar
-			else:
-				lector(m, setter)
-				lector(m, checker)
-		print("Fin Iteracion")
+			lector(m, setter)
+			lector(m, checker)
+	print("Fin Iteracion")
 
 ########################
 # Funciones auxiliares #
@@ -170,7 +162,8 @@ if __name__=="__main__":
 		# TODO: Carga las mibs
 		print ("Carga las mibs")
 		# Bucle principal Idle
-		BuclePrincipal()
+		while (True): # Solo para las interfaces de consola
+			FuncionPrincipal()
 		print("Fin")
 
 
