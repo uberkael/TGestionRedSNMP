@@ -8,7 +8,6 @@ import re	# Para checkeaServidor
 ###########################
 versionPy=sys.version_info
 if versionPy < (3, 0):
-	print ("Python 2")
 	from io import open # Para la lectura de fichero con opciones Python 3
 
 ######################
@@ -68,7 +67,6 @@ def lector(funcion):
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
-			# print ("linea", progreso, bprogreso, "%")
 			a=line.split()
 			if (len(a)>=2):
 				if(a[0][0]=="#"):
@@ -87,15 +85,16 @@ def lector(funcion):
 def setter(a):
 	"Escribe los datos en el dispositivo por SNMP"
 	# TODO: setOID
-	print("Valor Anterior de", a[0], "TODO: get", a[0])
-	print("TODO: set", a[0], a[1])
+	print("Valor Anterior de", a[0], "TODO: get", a[0]) # print para eliminar TODO
+	print("TODO: set", a[0], a[1]) # print para eliminar TODO
+	return 0 # no errores
 
 def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	# TODO: getOID
-	print("Valor buscado", a[0], "=", a[1])
-	print("TODO: get", a[0], "y comprobacion")
+	print("Valor buscado", a[0], "=", a[1])  # print para eliminar TODO
+	print("TODO: get", a[0], "y comprobacion")  # print para eliminar TODO
 	return estado
 
 def funcionPrincipal():
@@ -106,9 +105,8 @@ def funcionPrincipal():
 		raw_input(informacion)
 	else:
 		input(informacion)
-	if checkeaServidor(servidor):
+	if (checkeaServidor(servidor)):
 		# TODO: Conexion con el servidor
-		print ("Conexion con el servidor")
 		# Solo comprobar
 		if (check):
 			lector(checker)
@@ -116,7 +114,10 @@ def funcionPrincipal():
 		else:
 			lector(setter)
 			lector(checker)
-	print("Fin Iteracion")
+		informacion="Fin Iteracion"
+	else:
+		informacion="Error "+servidor+" no es una ip"
+	return informacion
 
 ########################
 # Funciones auxiliares #
@@ -125,10 +126,8 @@ def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	if re.match(regexip, servidor):
-		print("Servidor correcto")
 		return 1
 	else:
-		print ("Error ", servidor, " no es una ip")
 		return 0
 
 def geneRead(reader):
@@ -149,11 +148,9 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 		# TODO: Carga las mibs
-		print ("Carga las mibs")
 		# Bucle principal Idle
 		while (True): # Solo para las interfaces de consola
-			funcionPrincipal()
-		print("Fin")
+			print(funcionPrincipal())
 
 
 
