@@ -108,12 +108,16 @@ def lector(snmp,funcion, prd, texto):
 				if(a[0][0]=="#"):
 					print("Error: la linea es un comentario")
 				elif (funcion == setter):
-					if (not funcion(a)):
+					if (not funcion(snmp,a)):
 						cadena=a[0]+" "+a[1]+" CORRECTO"
 						print(cadena)
+						if(texto):
+							texto.insert("end", cadena+"\n")
 					else:
 						cadena=a[0]+" "+a[1]+" ERROR"
-						print(cadena)	
+						print(cadena)
+						if(texto):
+							texto.insert("end", cadena+"\n", "error")	
 			else :	
 				print("Error: la linea es incorrecta")
 				pass
@@ -187,7 +191,7 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 			print (cadena)
 			if(texto):
 				texto.insert("end", cadena+"\n", "importante")
-			lector(checker, prd, texto)
+			lector(snmp,checker, prd, texto)
 		informacion="Fin Iteracion"
 	else:
 		informacion="Error "+servidor+" no es una ip"
