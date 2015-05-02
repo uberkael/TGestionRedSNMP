@@ -71,39 +71,56 @@ if (len(sys.argv)>3):
 def lector(m,funcion, prd, texto):
 	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
-	# Lineas y para barra de progreso
-	lineas=cuentaLineas(archivo)
-	porcentaje=100/lineas
-	# Lectura del archivo
-	f=open(archivo, 'r')
-	progreso=0
-	bprogreso=0
-	for line in f:
-		if versionPy<(3, 0):	# Python2 strings no unicode
-			line=line.encode('ascii', 'ignore') # Si hay caracteres no ASCII
-			line=str(line)
-		progreso=progreso+1
-		bprogreso=porcentaje*progreso
-		if (prd):
-			prd['value']=bprogreso # Nuevo valor de progreso
-			prd.update_idletasks() # Actualiza la barra
-		linesplit=line.split()
-		if (len(linesplit)>=2):
-			if(linesplit[0][0]=="#"):
-				print("Error: la linea es un comentario")
-			else:
-				if (not funcion(linesplit[0],linesplit[1],m)):
-					cadena=linesplit[0]+" "+linesplit[1]+" CORRECTO"
-					print(cadena)
-					if(texto):
-						texto.insert("end", cadena+"\n")
+		# Lineas y para barra de progreso
+		lineas=cuentaLineas(archivo)
+		porcentaje=100/lineas
+		# Lectura del archivo
+		f=open(archivo, 'r')
+		progreso=0
+		bprogreso=0
+		for line in f:
+			if versionPy<(3, 0):	# Python2 strings no unicode
+				line=line.encode('ascii', 'ignore') # Si hay caracteres no ASCII
+				line=str(line)
+			progreso=progreso+1
+			bprogreso=porcentaje*progreso
+			linesplit=line.split()
+			if (len(linesplit)==2):
+				if(linesplit[0][0]=="#"):
+					print("Error: la linea es un comentario")
+					pass
 				else:
-					cadena=linesplit[0]+" "+linesplit[1]+" ERROR"
-					print(cadena)
-					if(texto):
-						texto.insert("end", cadena+"\n", "error")
-		else:
-			print("Error: la linea es incorrecta")
+					if (not funcion(linesplit[0],linesplit[1],m)):	
+						cadena=linesplit[0]+" "+linesplit[1]+" CORRECTO"
+						print(cadena)
+						if (texto):
+							texto.insert("end",cadena+"\n","importante")
+					else:
+						cadena=linesplit[0]+" "+linesplit[1]+" ERROR"
+						print(cadena)
+						if (texto):
+							texto.insert("end",cadena+"\n","error")
+			elif ((len(linesplit)==3) and (linesplit[2]=="nocheck")): 
+				#Contempla el caso en el que existe un identificador de no chequeo de ese oid en concreto
+				#Para evitar problemas con las tablas creadas dinamicamente por el usuario mediante la modificacion
+				#de la columna Status (por ejemplo en RMON), donde al establecer a CreateRequest, posteriormente cambiaria a 
+				#underCreation por lo que provocaria un fallo al hacer el check
+				if(linesplit[0][0]=="#"):
+					print("Error: la linea es un comentario")
+				elif (funcion == setter):
+					if (not funcion(linesplit[0],linesplit[1],m)):
+						cadena=linesplit[0]+" "+linesplit[1]+" CORRECTO"
+						print(cadena)
+						if (texto):
+							texto.insert("end",cadena+"\n","importante")
+					else:
+						cadena=linesplit[0]+" "+linesplit[1]+" ERROR"
+						print(cadena)	
+						if (texto):
+							texto.insert("end",cadena+"\n","error")
+			else :	
+				print("Error: la linea es incorrecta")
+				pass
 	except Exception as e:
 		cadena="Error de lectura "+str(e)
 		print(cadena)
