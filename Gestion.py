@@ -63,9 +63,9 @@ def lector(funcion):
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
 			a=line.split()
-			if (len(a)>=2):
+			if (len(a)==2):
 				if(a[0][0]=="#"):
-					# print("Error: la linea es un comentario")
+					print("Error: la linea es un comentario")
 					pass
 				else:
 					if (not funcion(a)):
@@ -74,8 +74,22 @@ def lector(funcion):
 					else:
 						cadena=a[0]+" "+a[1]+" ERROR"
 						print(cadena)
-			else:
-				# print("Error: la linea es incorrecta")
+			elif ((len(a)==3) and (a[2]=="nocheck")): 
+				#Contempla el caso en el que existe un identificador de no chequeo de ese oid en concreto
+				#Para evitar problemas con las tablas creadas dinamicamente por el usuario mediante la modificacion
+				#de la columna Status (por ejemplo en RMON), donde al establecer a CreateRequest, posteriormente cambiaria a 
+				#underCreation por lo que provocaria un fallo al hacer el check
+				if(a[0][0]=="#"):
+					print("Error: la linea es un comentario")
+				elif (funcion == setter):
+					if (not funcion(a)):
+						cadena=a[0]+" "+a[1]+" CORRECTO"
+						print(cadena)
+					else:
+						cadena=a[0]+" "+a[1]+" ERROR"
+						print(cadena)	
+			else :	
+				print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
 		cadena="Error de lectura "+str(e)
