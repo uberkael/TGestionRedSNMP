@@ -70,7 +70,7 @@ if (len(sys.argv)>3):
 
 def lector(m,funcion, prd, texto):
 	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
-	# try:
+	try:
 	# Lineas y para barra de progreso
 	lineas=cuentaLineas(archivo)
 	porcentaje=100/lineas
@@ -104,13 +104,13 @@ def lector(m,funcion, prd, texto):
 						texto.insert("end", cadena+"\n", "error")
 		else:
 			print("Error: la linea es incorrecta")
-	# except Exception as e:
-	# 	cadena="Error de lectura "+str(e)
-	# 	print(cadena)
-	# 	if(texto):
-	# 		texto.insert("end", cadena+"\n", "error")
-	# finally:
-	# 	pass
+	except Exception as e:
+		cadena="Error de lectura "+str(e)
+		print(cadena)
+		if(texto):
+			texto.insert("end", cadena+"\n", "error")
+	finally:
+		pass
 
 def setter(atributo,valor, m):
 	"Escribe los datos en el dispositivo por SNMP"
