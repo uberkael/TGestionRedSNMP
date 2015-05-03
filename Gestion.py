@@ -23,7 +23,6 @@ if versionPy<(3, 0):
 ######################
 servidor="10.10.10.2"
 archivo='configuracion.ini'
-mibs=[] # Lista de mibs a leer
 check=False # check, solo comprueba
 iteracion=0 # Lleva la cuenta de las maquinas
 modoGrafico=("DISPLAY" in os.environ) or ("nt" in os.name) # Por si se ejecuta en modo consola
