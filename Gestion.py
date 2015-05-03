@@ -1,7 +1,9 @@
 #!/usr/bin/python
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
-import re	# Para CheckeaServidor
+import re	# Para checkeaServidor
+import os	# Para averiguar el entorno
+
 #####################
 # Biblioteca SNIMPY #
 #####################
@@ -23,30 +25,32 @@ servidor="10.10.10.2"
 archivo='configuracion.ini'
 check=False # check, solo comprueba
 iteracion=0 # Lleva la cuenta de las maquinas
+modoGrafico=("DISPLAY" in os.environ) or ("nt" in os.name) # Por si se ejecuta en modo consola
 
 ###################################
 # Argumentos en linea de comandos #
 ###################################
-if (len(sys.argv)==2):
-	if (sys.argv[1].lower()=="check"):
+tamArgs=len(sys.argv)
+if (tamArgs==2):
+	if ("check" in sys.argv[-1].lower()):
 		check=True
 	else:
 		servidor=sys.argv[1]
 # Si hay tres argumentos es el servidor y un archivo
-if (len(sys.argv)==3):
+if (tamArgs==3):
 	servidor=sys.argv[1]
-	if (sys.argv[2].lower()=="check"):
+	if ("check" in sys.argv[-1].lower()):
 		check=True
 	else:
 		archivo=sys.argv[2]
 # Si hay mas de tres argumentos es el servidor y un archivo y check
-if (len(sys.argv)>3):
+if (tamArgs>3):
 	servidor=sys.argv[1]
 	archivo=sys.argv[2]
-	if (sys.argv[3].lower()=="check"):
+	if ("check" in sys.argv[3].lower()):
 		check=True
 	else: # Si el tercero no es check algo esta mal
-		print("Uso:", sys.argv[0], "<servidor><archivo> [<check>]")
+		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
 		quit()
 
 ###########################
@@ -97,15 +101,20 @@ def setter(a, m):
 def checker(a, m):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
-	# print("Valor buscado", a[0], "=", a[1])
-	respuesta=str(getattr(m, a[0]))
-	print(respuesta)
-	if (a[1]==respuesta):
-		# print("Correcto")
-		pass # sin errores
+	if ("nocheck" in a[-1]):
+		# No chequea la tabla
+		pass
 	else:
-		# print("Error: GET ha devuelto otra cosa")
-		estado=1 # errores
+		# print("Valor buscado", a[0], "=", a[1])
+		respuesta=str(getattr(m, a[0]))
+		print(respuesta)
+		if (a[1]==respuesta):
+			# print("Correcto")
+			pass # sin errores
+		else:
+			# print("Error: GET ha devuelto otra cosa")
+			estado=1 # errores
+		pass
 	return estado
 
 def funcionPrincipal():
@@ -184,6 +193,5 @@ if __name__=="__main__":
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
 		print(cadena)
-
 
 
