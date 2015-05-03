@@ -1,8 +1,19 @@
 #!/usr/bin/python
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
+<<<<<<< HEAD
 import re	# Para checkeaServidor
 import os
+=======
+import re	# Para CheckeaServidor
+###################
+# Biblioteca HNMP #
+###################
+# http://pysnmp.sourceforge.net/
+# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-v2c.html
+# http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/set-v2c-with-value-type-mib-lookup.html
+from pysnmp.entity.rfc3413.oneliner import cmdgen
+>>>>>>> pysnmp
 
 ###########################
 # Ejecucion en raspberry pi
@@ -135,6 +146,41 @@ def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	# TODO: getOID
+<<<<<<< HEAD
+=======
+	print("Valor buscado", a[0], "=", a[1])
+	# if (a[1]==" get a[0] "):
+	# print("Correcto")
+	cmdGen = cmdgen.CommandGenerator()
+	errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
+		cmdgen.CommunityData('public'),
+		cmdgen.UdpTransportTarget((servidor, 161)),
+		# '1.3.6.1.2.1.1.1.0', '1.3.6.1.2.1.1.6.0' TODO: Cambiar el bucle y ejecutar al final con toda la lista
+		a[0]
+		)
+	# Check for errors and print out results
+	if errorIndication:
+		print(errorIndication)
+		estado=1 # errores
+	else:
+		if errorStatus:
+			print('%s at %s' % (
+				errorStatus.prettyPrint(),
+				errorIndex and varBinds[int(errorIndex)-1] or '?'
+				)
+			)
+			estado=1 # errores
+		else:
+			for name, val in varBinds:
+				print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
+				print("Valor buscado", a[0], "=", a[1])
+				if (a[1]==val.prettyPrint()):
+					print("Correcto")
+				else:
+					print("Error: GET ha devuelto otra cosa")
+					estado=1 # errores
+
+>>>>>>> pysnmp
 	return estado
 
 def funcionPrincipal():
