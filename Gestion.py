@@ -97,6 +97,30 @@ def lector(funcion):
 def setter(a):
 	"Escribe los datos en el dispositivo por SNMP"
 	# TODO: setOID
+	cmdGen = cmdgen.CommandGenerator()
+	errorIndication, errorStatus, errorIndex, varBinds = cmdGen.setCmd(
+		cmdgen.CommunityData('public'),
+		cmdgen.UdpTransportTarget((servidor, 161)),
+		# '1.3.6.1.2.1.1.1.0', '1.3.6.1.2.1.1.6.0' TODO: Cambiar el bucle y ejecutar al final con toda la lista
+		(a[0], a[1])
+		)
+	# Check for errors and print out results
+	if errorIndication:
+		print(errorIndication)
+		estado=1 # errores
+	else:
+		if errorStatus:
+			print('%s at %s' % (
+				errorStatus.prettyPrint(),
+				errorIndex and varBinds[int(errorIndex)-1] or '?'
+				)
+			)
+			estado=1 # errores
+		else:
+			pass
+			# for name, val in varBinds:
+				# print("Valor buscado", a[0], "=", a[1])
+				# print('%s = %s' % (name.prettyPrint(), val.prettyPrint()))
 	return 0 # no errores
 
 def checker(a):
@@ -135,7 +159,6 @@ def checker(a):
 					else:
 						# print("Error: GET ha devuelto otra cosa")
 						estado=1 # errores
-		pass
 	return estado
 
 def funcionPrincipal():
