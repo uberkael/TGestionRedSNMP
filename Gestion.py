@@ -286,7 +286,8 @@ def funcionCambiarIP():
 #Manejador de signal para detectar ctrl-C
 def signal_handler(signal, frame):
 	#Restaurar los valores predeterminados
-        GPIO.cleanup()
+        gpio.cleanup()
+        lirc.cierraSocket()
 	#Salir del programa
         sys.exit(0)
 
