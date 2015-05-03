@@ -4,6 +4,11 @@ import sys	# Para los argumentos
 import re	# Para checkeaServidor
 import os	# Para averiguar el entorno
 
+###################
+# Biblioteca HNMP #
+###################
+# https://github.com/trehn/hnmp
+from hnmp import SNMP
 
 ###########################
 # Compatibilidad Python 2 #
@@ -50,7 +55,7 @@ if (tamArgs>3):
 ###########################
 # Definicion de funciones #
 ###########################
-def lector(funcion):
+def lector(snmp, funcion):
 	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
 		# Lineas y para barra de progreso
@@ -72,7 +77,7 @@ def lector(funcion):
 					# print("Error: la linea es un comentario")
 					pass
 				else:
-					if (not funcion(a)):
+					if (not funcion(snmp,a)):
 						cadena=a[0]+" "+a[1]+" CORRECTO"
 						print(cadena)
 					else:
@@ -87,19 +92,29 @@ def lector(funcion):
 	finally:
 		pass
 
-def setter(a):
+def setter(snmp, a):
 	"Escribe los datos en el dispositivo por SNMP"
-	# TODO: setOID
+	# respuesta=str(snmp.get(a[0]))
+	# print("Valor Anterior de", a[0], respuesta)
+	snmp.set(a[0], a[1])
 	return 0 # no errores
 
-def checker(a):
+def checker(snmp, a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	if ("nocheck" in a[-1]):
 		# No chequea la tabla
 		pass
 	else:
-		# TODO: getOID (aqui va lo de HNMP, pySNMP o SNIMPY)
+		# print("Valor buscado", a[0], "=", a[1])
+		respuesta=str(snmp.get(a[0]))
+		# print(respuesta)
+		if (a[1]==respuesta):
+			# print("Correcto")
+			pass # sin errores
+		else:
+			# print("Error: GET ha devuelto otra cosa")
+			estado=1 # errores
 		pass
 	return estado
 
@@ -112,20 +127,21 @@ def funcionPrincipal():
 	cadena="Ejecutado: "+str(iteracion)
 	print (cadena)
 	if (checkeaServidor(servidor)):
-		# TODO: Conexion con el servidor
+		# Conexion con el servidor
+		snmp = SNMP(servidor, community="public")  # v2c
 		# Solo comprobar
 		if (check):
 			cadena="Comprobacion:"
 			print (cadena)
-			lector(checker)
+			lector(snmp, checker)
 		# Asignar y comprobar
 		else:
 			cadena="Configuracion:"
 			print (cadena)
-			lector(setter)
+			lector(snmp, setter)
 			cadena="Comprobacion:"
 			print (cadena)
-			lector(checker)
+			lector(snmp, checker)
 		informacion="Fin Iteracion"
 	else:
 		informacion="Error "+servidor+" no es una ip"
@@ -168,7 +184,6 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-	# TODO: Carga las mibs
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
