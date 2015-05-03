@@ -1,11 +1,8 @@
 #!/usr/bin/python
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
-<<<<<<< HEAD
 import re	# Para checkeaServidor
 import os
-=======
-import re	# Para CheckeaServidor
 ###################
 # Biblioteca HNMP #
 ###################
@@ -13,7 +10,6 @@ import re	# Para CheckeaServidor
 # http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-v2c.html
 # http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/set-v2c-with-value-type-mib-lookup.html
 from pysnmp.entity.rfc3413.oneliner import cmdgen
->>>>>>> pysnmp
 
 ###########################
 # Ejecucion en raspberry pi
@@ -146,8 +142,6 @@ def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	# TODO: getOID
-<<<<<<< HEAD
-=======
 	print("Valor buscado", a[0], "=", a[1])
 	# if (a[1]==" get a[0] "):
 	# print("Correcto")
@@ -180,7 +174,6 @@ def checker(a):
 					print("Error: GET ha devuelto otra cosa")
 					estado=1 # errores
 
->>>>>>> pysnmp
 	return estado
 
 def funcionPrincipal():
