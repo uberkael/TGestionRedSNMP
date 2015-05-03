@@ -127,7 +127,7 @@ def funcionPrincipal():
 	print (cadena)
 	if (checkeaServidor(servidor)):
 		# Conexion con el servidor
-		m=M(ip, community="public", version=1)
+		m=M(servidor, community="public", version=1)
 		# Solo comprobar
 		if (check):
 			cadena="Comprobacion:"
