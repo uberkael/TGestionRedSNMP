@@ -20,7 +20,7 @@ if versionPy<(3, 0):
 ######
 # Tk #
 ######
-if versionPy < (3, 0):
+if versionPy<(3, 0):
 	from Tkinter import *				# Importa todos los objetos
 	import ttk							# Importa los themes de Tk
 	import tkFileDialog as filedialog 	# Importa los dialogos y selector
@@ -94,16 +94,21 @@ def lector(snmp, funcion, prd, texto):
 					# print("Error: la linea es un comentario")
 					pass
 				else:
-					if (not funcion(snmp,a)):
+					if (not funcion(snmp, a)):
 						cadena=a[0]+" "+a[1]+" CORRECTO"
 						print(cadena)
 						if(texto):
 							texto.insert("end", cadena+"\n")
+							texto.see("end") # Se asegura de ir al final
 					else:
 						cadena=a[0]+" "+a[1]+" ERROR"
 						print(cadena)
 						if(texto):
 							texto.insert("end", cadena+"\n", "error")
+							texto.see("end") # Se asegura de ir al final
+						if(prd): # Barra de color no compatible con estilos del sistema
+							prd['style']="red.Horizontal.TProgressbar"
+						break # Sale del bucle
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
@@ -112,6 +117,7 @@ def lector(snmp, funcion, prd, texto):
 		print(cadena)
 		if(texto):
 			texto.insert("end", cadena+"\n", "error")
+			texto.see("end") # Se asegura de ir al final
 	finally:
 		pass
 
@@ -152,6 +158,7 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 	print (cadena)
 	if(texto):
 		texto.insert("end", cadena+"\n", "importante")
+		texto.see("end") # Se asegura de ir al final
 	# Si hay variables del GUI, sobreescriben a las globales
 	if(servidorGUI):
 		servidor=servidorGUI
@@ -163,13 +170,14 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 	# Trabajo
 	if (checkeaServidor(servidor)):
 		# Conexion con el servidor
-		snmp = SNMP(servidor, community="public")  # v2c
+		snmp=SNMP(servidor, community="public")  # v2c
 		# Solo comprobar
 		if (check):
 			cadena="Comprobacion:"
 			print (cadena)
 			if(texto):
 				texto.insert("end", cadena+"\n", "importante")
+				texto.see("end") # Se asegura de ir al final
 			lector(snmp, checker, prd, texto)
 		# Asignar y comprobar
 		else:
@@ -177,11 +185,13 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 			print (cadena)
 			if(texto):
 				texto.insert("end", cadena+"\n", "importante")
+				texto.see("end") # Se asegura de ir al final
 			lector(snmp, setter, prd, texto)
 			cadena="Comprobacion:"
 			print (cadena)
 			if(texto):
 				texto.insert("end", cadena+"\n", "importante")
+				texto.see("end") # Se asegura de ir al final
 			lector(snmp, checker, prd, texto)
 		informacion="Fin Iteracion"
 	else:
@@ -194,7 +204,7 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 def GUITk():
 	"Todo el entorno grafico programado en Tk"
 	global servidor # Accede a la variable global para cambiar el valor
-	root = Tk()
+	root=Tk()
 	root.title("Configurador")
 	## Contenedor ##
 	flame=ttk.Frame(root, borderwidth=5, relief="sunken", width=600) # Crea un frame
@@ -210,12 +220,12 @@ def GUITk():
 	menu_edit=Menu(menubar)
 	menubar.add_cascade(menu=menu_file, label='File')
 	menubar.add_cascade(menu=menu_edit, label='Edit')
-	# TODO: Abrir archivo
+	# Abrir archivo
 	menu_file.add_command(label='Open file...', command=selecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
 	menu_file.add_command(label='Close to terminal', command=root.destroy)
 	menu_file.add_command(label='Close', command=exit)
-	# checkbutton
+	## checkbutton ##
 	checkGUI=IntVar()
 	checkGUI.set(check+1) # Truco valor trinario
 	menu_edit.add_checkbutton(label='Solo Check', variable=checkGUI, onvalue=2, offvalue=1)
@@ -238,11 +248,16 @@ def GUITk():
 	texto.tag_config("importante", foreground="yellow")
 	informacion="Verificar que hay un nuevo dispositivo, pulsa intro"
 	texto.insert("end", informacion+"\n") # Consola al inicio
+	texto.see("end") # Se asegura de ir al final
 	## Boton ##
-	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) ) # Crea un boton
-	# Scrollbar
+	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) )
+	## Scrollbar ##
 	sbv=ttk.Scrollbar(flame, orient=VERTICAL, command=texto.yview)
 	texto['yscrollcommand']=sbv.set
+	## Estilo para la barra de color rojo, error
+	s=ttk.Style()
+	# s.theme_use('clam') # Barra de color no compatible con estilos del sistema
+	s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
 	## Detalles Tk ##
 	# Agrega a la ventana
 	abel.grid(column=0, row=0)	# Agrega una etiqueta de texto
@@ -276,17 +291,19 @@ def trabajaIdle(servidorGUI, checkGUI, prd, texto):
 	"La funcion que realiza el trabajo en el modo grafico"
 	borraConsola(texto) # Borra el texto
 	prd.stop() # Para la animacion de la barra de progreso
+	prd['style']=""
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
 	prd.update_idletasks() # Actualiza la barra
 	cadena=funcionPrincipal(servidorGUI, checkGUI, prd, texto)
 	texto.insert("end", cadena+"\n", "importante")
+	texto.see("end") # Se asegura de ir al final
 
 ########################
 # Funciones auxiliares #
 ########################
 def funcionConsola():
-	informacion="Conectar un nuevo dispositivo y pulsa Enter para configurarlo"
+	informacion="Conecta un nuevo dispositivo y pulsa <Enter> para configurarlo"
 	global servidor
 	if versionPy<(3, 0):	# Python2
 		raw_input(informacion)
@@ -326,4 +343,3 @@ if __name__=="__main__":
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
 		print(cadena)
-
