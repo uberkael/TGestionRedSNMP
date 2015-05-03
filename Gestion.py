@@ -198,7 +198,6 @@ def GUITk():
 	menu_file.add_separator() # ver abajo separador
 	menu_file.add_command(label='Close to terminal', command=root.destroy)
 	menu_file.add_command(label='Close', command=exit)
-
 	# checkbutton
 	checkGUI=IntVar()
 	checkGUI.set(check+1) # Truco valor trinario
@@ -304,7 +303,8 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 	# TODO: Carga las mibs
-	GUITk()
+	if (modoGrafico): # Si esta en modo grafico carga Tk
+		GUITk()
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
