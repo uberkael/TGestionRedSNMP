@@ -185,12 +185,11 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 	# Carga las mibs
-	load("mibs/RFC1155-SMI.mib")
-	load("mibs/RFC-1212.mib")
-	load("mibs/rfc1213.mib")
-	bucleactivo= False
-	# TODO: Carga las mibs
 	mibs=["mibs/RFC1155-SMI.mib", "mibs/RFC-1212.mib", "mibs/rfc1213.mib"]
+	for mib in mibs:
+		print(mib)
+		load(mib)
+		pass
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
