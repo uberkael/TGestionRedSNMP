@@ -17,6 +17,7 @@ if versionPy<(3, 0):
 ######################
 servidor="10.10.10.2"
 archivo='configuracion.ini'
+mibs=[] # Lista de mibs a leer
 check=False # check, solo comprueba
 iteracion=0 # Lleva la cuenta de las maquinas
 modoGrafico=("DISPLAY" in os.environ) or ("nt" in os.name) # Por si se ejecuta en modo consola
@@ -169,6 +170,7 @@ def cuentaLineas(archivo):
 ###################################
 if __name__=="__main__":
 	# TODO: Carga las mibs
+	mibs=["mibs/RFC1155-SMI.mib", "mibs/RFC-1212.mib", "mibs/rfc1213.mib"]
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
