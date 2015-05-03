@@ -3,6 +3,7 @@ from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al
 import sys	# Para los argumentos
 import re	# Para checkeaServidor
 import os
+import signal
 ###################
 # Biblioteca HNMP #
 ###################
@@ -142,7 +143,6 @@ def checker(a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
 	# TODO: getOID
-	print("Valor buscado", a[0], "=", a[1])
 	# if (a[1]==" get a[0] "):
 	# print("Correcto")
 	cmdGen = cmdgen.CommandGenerator()
@@ -170,7 +170,7 @@ def checker(a):
 				print("Valor buscado", a[0], "=", a[1])
 				if (a[1]==val.prettyPrint()):
 					print("Correcto")
-				else:
+				else :
 					print("Error: GET ha devuelto otra cosa")
 					estado=1 # errores
 
@@ -270,6 +270,7 @@ def funcionMenu():
 
 def funcionCambiarIP():
 	print("cambiando IP")
+	global servidor
 	nuevaIP = ""
 	ipcorrecta = True
 	codigoIR = lirc.nuevoCodigo()
@@ -281,6 +282,16 @@ def funcionCambiarIP():
 		servidor = nuevaIP
 		print(servidor)
 	print("Ip cambiada")
+
+#Manejador de signal para detectar ctrl-C
+def signal_handler(signal, frame):
+	#Restaurar los valores predeterminados
+        GPIO.cleanup()
+	#Salir del programa
+        sys.exit(0)
+
+signal.signal(signal.SIGINT,signal_handler)
+
 ###################################
 # Comienza el programa principal #
 ###################################
