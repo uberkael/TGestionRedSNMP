@@ -2,7 +2,34 @@
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
 import re	# Para checkeaServidor
+import os
 
+###########################
+# Ejecucion en raspberry pi
+###########################
+if (os.uname()[1] == "raspberrypi"):
+	raspberrypi = True
+if (raspberrypi):
+	import RPi.GPIO as gpio
+	import LircUnixSocketRead as lirc
+	gpio.setmode(gpio.BCM)
+	pinesprogreso = [4,17,27,22,5]
+	pinmenu = 18
+	pincheck = 23
+	pinerror = 24
+	gpio.setwarnings(False)
+	gpio.setup(pinesprogreso,gpio.OUT,initial=False)
+	gpio.setup(pinmenu,gpio.OUT,initial=False)
+	gpio.setup(pincheck,gpio.OUT,initial=False)
+	gpio.setup(pinerror,gpio.OUT,initial=False)
+	lirc.iniciaSocket()
+	KEY_ENTER = "KEY_OK"
+	KEY_MENU = "KEY_WINDOWS"
+	KEY_CHECK = "KEY_INFO"
+	KEY_CHANGESERVERIP = "KEY_BACK"
+	KEYS_NUMERIC_DOT = {"KEY_1":"1","KEY_2":"2","KEY_3":"3","KEY_4":"4", \
+						"KEY_5":"5","KEY_6":"6","KEY_7":"7", \
+						"KEY_8":"8","KEY_9":"9","KEY_0":"0","KEY_*":"."}
 ###########################
 # Compatibilidad Python 2 #
 ###########################
@@ -50,8 +77,9 @@ def lector(funcion):
 	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
 		# Lineas y para barra de progreso
+		barraLedReset()
 		lineas=cuentaLineas(archivo)
-		porcentaje=100/lineas
+		porcentaje=100.0/lineas
 		# Lectura del archivo
 		f=open(archivo, 'r')
 		progreso=0
@@ -62,6 +90,7 @@ def lector(funcion):
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
+			barraLedActualiza(bprogreso)	
 			a=line.split()
 			if (len(a)==2):
 				if(a[0][0]=="#"):
@@ -139,15 +168,21 @@ def funcionPrincipal():
 ########################
 # Funciones auxiliares #
 ########################
+# def funcionConsola():
+# 	informacion="Conectar un nuevo dispositivo y pulsa Enter para configurarlo"
+# 	global servidor
+# 	if versionPy<(3, 0):	# Python2
+# 		raw_input(informacion)
+# 	else:
+# 		input(informacion)
+# 	return funcionPrincipal()
 def funcionConsola():
-	informacion="Conectar un nuevo dispositivo y pulsa Enter para configurarlo"
-	global servidor
-	if versionPy<(3, 0):	# Python2
-		raw_input(informacion)
-	else:
-		input(informacion)
-	return funcionPrincipal()
-
+	codigoIR = lirc.nuevoCodigo()
+	if (codigoIR== KEY_ENTER):
+		funcionPrincipal()
+	elif (codigoIR == KEY_MENU):
+		funcionMenu()
+	return "Esperando"
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
@@ -169,6 +204,44 @@ def cuentaLineas(archivo):
 	f_gen=geneRead(f.raw.read)
 	return sum(buf.count(b'\n') for buf in f_gen)
 
+###############################
+# Funciones para raspberry pi #
+###############################
+def barraLedActualiza(progreso):
+	indice = progreso / 20
+	if(indice < 4.9): 
+		indice = int(indice)
+	else:
+		indice = 5
+	if(indice>0):
+		gpio.output(pinesprogreso[0:indice],True)
+
+def barraLedReset():
+	gpio.output(pinesprogreso,False)
+
+def funcionMenu():
+	global check
+	gpio.output(pinmenu,True)
+	codigoIR = lirc.nuevoCodigo()
+	if (codigoIR == KEY_CHECK):
+		check = not check
+	elif (codigoIR == KEY_CHANGESERVERIP):
+		funcionCambiarIP()
+	gpio.output(pinmenu,False)
+
+def funcionCambiarIP():
+	print("cambiando IP")
+	nuevaIP = ""
+	ipcorrecta = True
+	codigoIR = lirc.nuevoCodigo()
+	while( codigoIR in KEYS_NUMERIC_DOT):
+		nuevaIP = nuevaIP+KEYS_NUMERIC_DOT[codigoIR]
+		codigoIR = lirc.nuevoCodigo()
+	ipcorrecta = checkeaServidor(nuevaIP)
+	if(ipcorrecta == True):
+		servidor = nuevaIP
+		print(servidor)
+	print("Ip cambiada")
 ###################################
 # Comienza el programa principal #
 ###################################
