@@ -404,6 +404,7 @@ def funcionMenu():
 
 def funcionCambiarIP():
 	print("cambiando IP")
+	global servidor
 	nuevaIP = ""
 	ipcorrecta = True
 	codigoIR = lirc.nuevoCodigo()
