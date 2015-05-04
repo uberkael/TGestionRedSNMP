@@ -2,7 +2,13 @@
 from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al inicio
 import sys	# Para los argumentos
 import re	# Para checkeaServidor
-import os
+import os	# Para averiguar el entorno
+
+###################
+# Biblioteca HNMP #
+###################
+# https://github.com/trehn/hnmp
+from hnmp import SNMP
 
 ###########################
 # Ejecucion en raspberry pi
@@ -37,6 +43,20 @@ versionPy=sys.version_info
 if versionPy<(3, 0):
 	from io import open # Para la lectura de fichero con opciones Python 3
 
+######
+# Tk #
+######
+if versionPy<(3, 0):
+	from Tkinter import *				# Importa todos los objetos
+	import ttk							# Importa los themes de Tk
+	import tkFileDialog as filedialog 	# Importa los dialogos y selector
+	import tkFont as font				# Importa fuentes para la consola de errores
+else:
+	from tkinter import *				# Importa todos los objetos
+	from tkinter import ttk				# Importa los themes de Tk
+	from tkinter import filedialog		# Importa los dialogos y selector
+	from tkinter import font			# Importa fuentes para la consola de errores
+
 ######################
 # Variables globales #
 ######################
@@ -44,36 +64,38 @@ servidor="10.10.10.2"
 archivo='configuracion.ini'
 check=False # check, solo comprueba
 iteracion=0 # Lleva la cuenta de las maquinas
+modoGrafico=("DISPLAY" in os.environ) or ("nt" in os.name) # Por si se ejecuta en modo consola
 
 ###################################
 # Argumentos en linea de comandos #
 ###################################
-if (len(sys.argv)==2):
-	if (sys.argv[1].lower()=="check"):
+tamArgs=len(sys.argv)
+if (tamArgs==2):
+	if ("check" in sys.argv[-1].lower()):
 		check=True
 	else:
 		servidor=sys.argv[1]
 # Si hay tres argumentos es el servidor y un archivo
-if (len(sys.argv)==3):
+if (tamArgs==3):
 	servidor=sys.argv[1]
-	if (sys.argv[2].lower()=="check"):
+	if ("check" in sys.argv[-1].lower()):
 		check=True
 	else:
 		archivo=sys.argv[2]
 # Si hay mas de tres argumentos es el servidor y un archivo y check
-if (len(sys.argv)>3):
+if (tamArgs>3):
 	servidor=sys.argv[1]
 	archivo=sys.argv[2]
-	if (sys.argv[3].lower()=="check"):
+	if ("check" in sys.argv[3].lower()):
 		check=True
 	else: # Si el tercero no es check algo esta mal
-		print("Uso:", sys.argv[0], "<servidor><archivo> [<check>]")
+		print("Uso:", sys.argv[0], "<servidor> <archivo> [<check>]")
 		quit()
 
 ###########################
 # Definicion de funciones #
 ###########################
-def lector(funcion):
+def lector(snmp, funcion, prd, texto):
 	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
 		# Lineas y para barra de progreso
@@ -90,80 +112,221 @@ def lector(funcion):
 				line=str(line)
 			progreso=progreso+1
 			bprogreso=porcentaje*progreso
-			barraLedActualiza(bprogreso)	
+			if (raspberrypi):
+				barraLedActualiza(bprogreso)	
+			if (prd):
+				prd['value']=bprogreso # Nuevo valor de progreso
+				prd.update_idletasks() # Actualiza la barra
 			a=line.split()
-			if (len(a)==2):
+			if (len(a)>=2):
 				if(a[0][0]=="#"):
-					print("Error: la linea es un comentario")
+					# print("Error: la linea es un comentario")
 					pass
 				else:
-					if (not funcion(a)):
+					if (not funcion(snmp, a)):
 						cadena=a[0]+" "+a[1]+" CORRECTO"
 						print(cadena)
+						if(texto):
+							texto.insert("end", cadena+"\n")
+							texto.see("end") # Se asegura de ir al final
 					else:
 						cadena=a[0]+" "+a[1]+" ERROR"
 						print(cadena)
-			elif ((len(a)==3) and (a[2]=="nocheck")): 
-				#Contempla el caso en el que existe un identificador de no chequeo de ese oid en concreto
-				#Para evitar problemas con las tablas creadas dinamicamente por el usuario mediante la modificacion
-				#de la columna Status (por ejemplo en RMON), donde al establecer a CreateRequest, posteriormente cambiaria a 
-				#underCreation por lo que provocaria un fallo al hacer el check
-				if(a[0][0]=="#"):
-					print("Error: la linea es un comentario")
-				elif (funcion == setter):
-					if (not funcion(a)):
-						cadena=a[0]+" "+a[1]+" CORRECTO"
-						print(cadena)
-					else:
-						cadena=a[0]+" "+a[1]+" ERROR"
-						print(cadena)	
-			else :	
-				print("Error: la linea es incorrecta")
+						if(texto):
+							texto.insert("end", cadena+"\n", "error")
+							texto.see("end") # Se asegura de ir al final
+						if(prd): # Barra de color no compatible con estilos del sistema
+							prd['style']="red.Horizontal.TProgressbar"
+						break # Sale del bucle
+			else:
+				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
 		cadena="Error de lectura "+str(e)
 		print(cadena)
+		if(texto):
+			texto.insert("end", cadena+"\n", "error")
+			texto.see("end") # Se asegura de ir al final
 	finally:
 		pass
 
-def setter(a):
+def setter(snmp, a):
 	"Escribe los datos en el dispositivo por SNMP"
-	# TODO: setOID
+	# respuesta=str(snmp.get(a[0]))
+	# print("Valor Anterior de", a[0], respuesta)
+	snmp.set(a[0], a[1])
 	return 0 # no errores
 
-def checker(a):
+def checker(snmp, a):
 	"Comprueba los datos en el dispositivo por SNMP"
 	estado=0 # no errores
-	# TODO: getOID
+	if ("nocheck" in a[-1]):
+		# No chequea la tabla
+		pass
+	else:
+		# print("Valor buscado", a[0], "=", a[1])
+		respuesta=str(snmp.get(a[0]))
+		# print(respuesta)
+		if (a[1]==respuesta):
+			# print("Correcto")
+			pass # sin errores
+		else:
+			# print("Error: GET ha devuelto otra cosa")
+			estado=1 # errores
+		pass
 	return estado
 
-def funcionPrincipal():
+def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
 	global iteracion
 	global servidor
 	global check
+	# Aumenta el numero de ejecuciones
 	iteracion=iteracion+1
 	cadena="Ejecutado: "+str(iteracion)
 	print (cadena)
+	if(texto):
+		texto.insert("end", cadena+"\n", "importante")
+		texto.see("end") # Se asegura de ir al final
+	# Si hay variables del GUI, sobreescriben a las globales
+	if(servidorGUI):
+		servidor=servidorGUI
+	# truco con valor trinario
+	if(checkGUI==1):
+		check=False
+	elif (checkGUI==2):
+		check=True
+	# Trabajo
 	if (checkeaServidor(servidor)):
-		# TODO: Conexion con el servidor
+		# Conexion con el servidor
+		snmp=SNMP(servidor, community="public")  # v2c
 		# Solo comprobar
 		if (check):
 			cadena="Comprobacion:"
 			print (cadena)
-			lector(checker)
+			if(texto):
+				texto.insert("end", cadena+"\n", "importante")
+				texto.see("end") # Se asegura de ir al final
+			lector(snmp, checker, prd, texto)
 		# Asignar y comprobar
 		else:
 			cadena="Configuracion:"
 			print (cadena)
-			lector(setter)
+			if(texto):
+				texto.insert("end", cadena+"\n", "importante")
+				texto.see("end") # Se asegura de ir al final
+			lector(snmp, setter, prd, texto)
 			cadena="Comprobacion:"
 			print (cadena)
-			lector(checker)
+			if(texto):
+				texto.insert("end", cadena+"\n", "importante")
+				texto.see("end") # Se asegura de ir al final
+			lector(snmp, checker, prd, texto)
 		informacion="Fin Iteracion"
 	else:
 		informacion="Error "+servidor+" no es una ip"
 	return informacion
+
+#######
+# GUI #
+#######
+def GUITk():
+	"Todo el entorno grafico programado en Tk"
+	global servidor # Accede a la variable global para cambiar el valor
+	root=Tk()
+	root.title("Configurador")
+	## Contenedor ##
+	flame=ttk.Frame(root, borderwidth=5, relief="sunken", width=600) # Crea un frame
+	# "flat", "raised", "sunken", "solid", "ridge", or "groove".
+	# flame.configure(width=600) # Ancho del frame (Se suele ajustar automaticamente)
+	# flame.configure(height=400) # Alto del frame (Se suele ajustar automaticamente)
+	## Creacion de un menu ##
+	root.option_add('*tearOff', FALSE) # Evita que los menus sean solo una linea sin nada
+	menubar=Menu(root)
+	root['menu']=menubar
+	# Agregando menus
+	menu_file=Menu(menubar)
+	menu_edit=Menu(menubar)
+	menubar.add_cascade(menu=menu_file, label='File')
+	menubar.add_cascade(menu=menu_edit, label='Edit')
+	# Abrir archivo
+	menu_file.add_command(label='Open file...', command=selecionaArchivo)
+	menu_file.add_separator() # ver abajo separador
+	menu_file.add_command(label='Close to terminal', command=root.destroy)
+	menu_file.add_command(label='Close', command=exit)
+	## checkbutton ##
+	checkGUI=IntVar()
+	checkGUI.set(check+1) # Truco valor trinario
+	menu_edit.add_checkbutton(label='Solo Check', variable=checkGUI, onvalue=2, offvalue=1)
+	## Campo del servidor ##
+	abel=ttk.Label(flame, text='Servidor:')
+	servidorGUI=StringVar() # La variable en Tk tiene que ser un StringVar
+	servidorGUI.set(servidor) # Sustituye la variable original servidor
+	campo=ttk.Entry(flame, textvariable=servidorGUI, width=14)
+	## Barra de progreso ##
+	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
+	prd.configure('maximum') # muestra el valor maximo (defecto 100)
+	prd.configure(value=1) # pone la barra a un valor
+	prd['mode']='indeterminate'
+	prd.start(15)
+	## Consola de errores ##
+	# una fuente de windows
+	grombenawer=font.Font(family='Consolas', size=14, weight='bold') # 	from tkinter import font
+	texto=Text(flame, wrap="word", background="black", foreground="green", font=grombenawer, selectbackground="black", selectforeground="green", undo=True)
+	texto.tag_config("error", foreground="red")
+	texto.tag_config("importante", foreground="yellow")
+	informacion="Verificar que hay un nuevo dispositivo, pulsa intro"
+	texto.insert("end", informacion+"\n") # Consola al inicio
+	texto.see("end") # Se asegura de ir al final
+	## Boton ##
+	boton=ttk.Button(flame, text="Configura", width=60, command=lambda: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) )
+	## Scrollbar ##
+	sbv=ttk.Scrollbar(flame, orient=VERTICAL, command=texto.yview)
+	texto['yscrollcommand']=sbv.set
+	## Estilo para la barra de color rojo, error
+	s=ttk.Style()
+	# s.theme_use('clam') # Barra de color no compatible con estilos del sistema
+	s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
+	## Detalles Tk ##
+	# Agrega a la ventana
+	abel.grid(column=0, row=0)	# Agrega una etiqueta de texto
+	campo.grid(column=0, row=1)	# Agrega campo de servidor
+	boton.grid(column=0, row=2)	# Agrega boton
+	prd.grid(column=0, row=3)	# Agrega barra de progreso
+	texto.grid(column=0, row=4)	# Agrega consola de errores
+	sbv.grid(column=1, row=4, sticky=(N, S))
+	flame.grid()	# Agrega el frame
+	# Agrega la tecla intro como le diera al boton
+	root.bind('<Return>', lambda event: trabajaIdle(servidorGUI.get(), checkGUI.get(), prd, texto) )
+	# Comienza el dibujo
+	root.mainloop() # Al final
+
+#####################
+# Funciones del GUI #
+#####################
+def selecionaArchivo():
+	"Dialogo para seleccionar un archivo, File, New"
+	global archivo # Accede a la variable global para cambiar el valor
+	filename=filedialog.askopenfilename(initialfile="configuracion.ini", filetypes=[('Archivos de Configuracion', '*.ini'), ('All Files', '*')])
+	if(filename):
+		archivo=filename
+
+def borraConsola(texto):
+	"Borra el buffer de la consola"
+	texto.delete("1.0", "end")
+	pass
+
+def trabajaIdle(servidorGUI, checkGUI, prd, texto):
+	"La funcion que realiza el trabajo en el modo grafico"
+	borraConsola(texto) # Borra el texto
+	prd.stop() # Para la animacion de la barra de progreso
+	prd['style']=""
+	prd['mode']='determinate'
+	prd['value']=0 # Pone la barra de progreso a 0
+	prd.update_idletasks() # Actualiza la barra
+	cadena=funcionPrincipal(servidorGUI, checkGUI, prd, texto)
+	texto.insert("end", cadena+"\n", "importante")
+	texto.see("end") # Se asegura de ir al final
 
 ########################
 # Funciones auxiliares #
@@ -177,12 +340,22 @@ def funcionPrincipal():
 # 		input(informacion)
 # 	return funcionPrincipal()
 def funcionConsola():
-	codigoIR = lirc.nuevoCodigo()
-	if (codigoIR== KEY_ENTER):
-		funcionPrincipal()
-	elif (codigoIR == KEY_MENU):
-		funcionMenu()
-	return "Esperando"
+	if (raspberrypi):
+		codigoIR = lirc.nuevoCodigo()
+		if (codigoIR== KEY_ENTER):
+			funcionPrincipal()
+		elif (codigoIR == KEY_MENU):
+			funcionMenu()
+		return "Esperando"
+	else:
+		informacion="Conecta un nuevo dispositivo y pulsa <Enter> para configurarlo"
+		global servidor
+		if versionPy<(3, 0):	# Python2
+			raw_input(informacion)
+		else:
+			input(informacion)
+		return funcionPrincipal()
+
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
 	regexip="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
@@ -247,10 +420,9 @@ def funcionCambiarIP():
 ###################################
 if __name__=="__main__":
 	# TODO: Carga las mibs
+	if (modoGrafico): # Si esta en modo grafico carga Tk
+		GUITk()
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
 		print(cadena)
-
-
-
