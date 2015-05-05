@@ -3,6 +3,7 @@ from __future__ import print_function # Python 2 Para print (1, 2) Debe estar al
 import sys	# Para los argumentos
 import re	# Para checkeaServidor
 import os	# Para averiguar el entorno
+import signal
 
 ###################
 # Biblioteca HNMP #
@@ -10,25 +11,25 @@ import os	# Para averiguar el entorno
 # https://github.com/trehn/hnmp
 from hnmp import SNMP
 
+raspberrypi = False
 ###########################
 # Ejecucion en raspberry pi
 ###########################
 if (os.uname()[1] == "raspberrypi"):
 	raspberrypi = True
-if (raspberrypi):
 	import RPi.GPIO as gpio
 	import LircUnixSocketRead as lirc
+	import threading
 	gpio.setmode(gpio.BCM)
 	pinesprogreso = [4,17,27,22,5]
 	pinmenu = 18
-	pincheck = 23
-	pinerror = 24
+	#pincheck = 23
+	pinerror = 12
 	gpio.setwarnings(False)
 	gpio.setup(pinesprogreso,gpio.OUT,initial=False)
 	gpio.setup(pinmenu,gpio.OUT,initial=False)
-	gpio.setup(pincheck,gpio.OUT,initial=False)
+	#gpio.setup(pincheck,gpio.OUT,initial=False)
 	gpio.setup(pinerror,gpio.OUT,initial=False)
-	lirc.iniciaSocket()
 	KEY_ENTER = "KEY_OK"
 	KEY_MENU = "KEY_WINDOWS"
 	KEY_CHECK = "KEY_INFO"
@@ -60,6 +61,11 @@ else:
 ######################
 # Variables globales #
 ######################
+servidorGUI = False #Variable de la entrada de texto del GUI
+checkGUI = False #Variable del toggle button del GUI
+ejecutando = False #Variable para evitar ejecucion simultanea de dos funciones principales
+prd = False #Barra de progreso del modo grafico
+texto = False #Caja de texto del modo grafico
 servidor="10.10.10.2"
 archivo='configuracion.ini'
 check=False # check, solo comprueba
@@ -99,7 +105,8 @@ def lector(snmp, funcion, prd, texto):
 	"Lee el archivo linea a linea y llama a checker() o setter() en cada una"
 	try:
 		# Lineas y para barra de progreso
-		barraLedReset()
+		if(raspberrypi):
+			barraLedReset()
 		lineas=cuentaLineas(archivo)
 		porcentaje=100.0/lineas
 		# Lectura del archivo
@@ -123,14 +130,17 @@ def lector(snmp, funcion, prd, texto):
 					# print("Error: la linea es un comentario")
 					pass
 				else:
-					if (not funcion(snmp, a)):
+					resultado =funcion(snmp,a)
+					if (resultado == 0):
 						cadena=a[0]+" "+a[1]+" CORRECTO"
 						print(cadena)
 						if(texto):
 							texto.insert("end", cadena+"\n")
 							texto.see("end") # Se asegura de ir al final
-					else:
+					elif(resultado == 1):
 						cadena=a[0]+" "+a[1]+" ERROR"
+						if(raspberrypi):
+							gpio.output(pinerror,True)
 						print(cadena)
 						if(texto):
 							texto.insert("end", cadena+"\n", "error")
@@ -138,15 +148,21 @@ def lector(snmp, funcion, prd, texto):
 						if(prd): # Barra de color no compatible con estilos del sistema
 							prd['style']="red.Horizontal.TProgressbar"
 						break # Sale del bucle
+					elif(resultado == 2):
+						pass #Considera el caso en el que la linea incluye un nocheck y por lo tanto no se comprueba
 			else:
 				# print("Error: la linea es incorrecta")
 				pass
 	except Exception as e:
 		cadena="Error de lectura "+str(e)
 		print(cadena)
+		if(raspberrypi):
+			gpio.output(pinerror,True)
 		if(texto):
 			texto.insert("end", cadena+"\n", "error")
 			texto.see("end") # Se asegura de ir al final
+		if(prd):
+			prd['style']="red.Horizontal.TProgressbar"
 	finally:
 		pass
 
@@ -162,7 +178,7 @@ def checker(snmp, a):
 	estado=0 # no errores
 	if ("nocheck" in a[-1]):
 		# No chequea la tabla
-		pass
+		estado = 2 #Indica al lector que la fila no se ha checkeado
 	else:
 		# print("Valor buscado", a[0], "=", a[1])
 		respuesta=str(snmp.get(a[0]))
@@ -176,55 +192,68 @@ def checker(snmp, a):
 		pass
 	return estado
 
-def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
+def funcionPrincipal():
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
+	global servidorGUI
+	global checkGUI
+	global prd
+	global texto
 	global iteracion
 	global servidor
 	global check
+	global ejecutando #Variable para evitar ejecucion simultanea de la funcion principal
+	#al poder ser lanzada mediante la consola o el entorno grafico, o mediante los infrarrojos
 	# Aumenta el numero de ejecuciones
-	iteracion=iteracion+1
-	cadena="Ejecutado: "+str(iteracion)
-	print (cadena)
-	if(texto):
-		texto.insert("end", cadena+"\n", "importante")
-		texto.see("end") # Se asegura de ir al final
-	# Si hay variables del GUI, sobreescriben a las globales
-	if(servidorGUI):
-		servidor=servidorGUI
-	# truco con valor trinario
-	if(checkGUI==1):
-		check=False
-	elif (checkGUI==2):
-		check=True
-	# Trabajo
-	if (checkeaServidor(servidor)):
-		# Conexion con el servidor
-		snmp=SNMP(servidor, community="public")  # v2c
-		# Solo comprobar
-		if (check):
-			cadena="Comprobacion:"
-			print (cadena)
-			if(texto):
-				texto.insert("end", cadena+"\n", "importante")
-				texto.see("end") # Se asegura de ir al final
-			lector(snmp, checker, prd, texto)
-		# Asignar y comprobar
+	informacion = "Fin iteracion"
+	if(ejecutando == False):
+		ejecutando = True # Para evitar dobles ejecuciones
+		iteracion=iteracion+1
+		cadena="Ejecutado: "+str(iteracion)
+		print (cadena)
+		if(texto):
+			texto.insert("end", cadena+"\n", "importante")
+			texto.see("end") # Se asegura de ir al final
+		# Si hay variables del GUI, sobreescriben a las globales
+		if(servidorGUI):
+			servidor=servidorGUI.get()
+		if(checkGUI):
+			# truco con valor trinario
+			if(checkGUI.get()==1):
+				check=False
+			elif (checkGUI.get()==2):
+				check=True
+		if(raspberrypi):
+			pinErrorReset()		
+		# Trabajo
+		if (checkeaServidor(servidor)):
+			# Conexion con el servidor
+			snmp=SNMP(servidor, community="public")  # v2c
+			# Solo comprobar
+			if (check):
+				cadena="Comprobacion:"
+				print (cadena)
+				if(texto):
+					texto.insert("end", cadena+"\n", "importante")
+					texto.see("end") # Se asegura de ir al final
+				lector(snmp, checker, prd, texto)
+			# Asignar y comprobar
+			else:
+				cadena="Configuracion:"
+				print (cadena)
+				if(texto):
+					texto.insert("end", cadena+"\n", "importante")
+					texto.see("end") # Se asegura de ir al final
+				lector(snmp, setter, prd, texto)
+				cadena="Comprobacion:"
+				print (cadena)
+				if(texto):
+					texto.insert("end", cadena+"\n", "importante")
+					texto.see("end") # Se asegura de ir al final
+				lector(snmp, checker, prd, texto)
+			informacion="Fin Iteracion"
 		else:
-			cadena="Configuracion:"
-			print (cadena)
-			if(texto):
-				texto.insert("end", cadena+"\n", "importante")
-				texto.see("end") # Se asegura de ir al final
-			lector(snmp, setter, prd, texto)
-			cadena="Comprobacion:"
-			print (cadena)
-			if(texto):
-				texto.insert("end", cadena+"\n", "importante")
-				texto.see("end") # Se asegura de ir al final
-			lector(snmp, checker, prd, texto)
-		informacion="Fin Iteracion"
-	else:
-		informacion="Error "+servidor+" no es una ip"
+			informacion="Error "+servidor+" no es una ip"
+		ejecutando = False #Permite una nueva ejecucion
 	return informacion
 
 #######
@@ -233,6 +262,10 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 def GUITk():
 	"Todo el entorno grafico programado en Tk"
 	global servidor # Accede a la variable global para cambiar el valor
+	global checkGUI
+	global servidorGUI
+	global prd
+	global texto
 	root=Tk()
 	root.title("Configurador")
 	## Contenedor ##
@@ -253,7 +286,7 @@ def GUITk():
 	menu_file.add_command(label='Open file...', command=selecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
 	menu_file.add_command(label='Close to terminal', command=root.destroy)
-	menu_file.add_command(label='Close', command=exit)
+	menu_file.add_command(label='Close', command=lambda: exitGUI(root))
 	## checkbutton ##
 	checkGUI=IntVar()
 	checkGUI.set(check+1) # Truco valor trinario
@@ -324,7 +357,7 @@ def trabajaIdle(servidorGUI, checkGUI, prd, texto):
 	prd['mode']='determinate'
 	prd['value']=0 # Pone la barra de progreso a 0
 	prd.update_idletasks() # Actualiza la barra
-	cadena=funcionPrincipal(servidorGUI, checkGUI, prd, texto)
+	cadena=funcionPrincipal()
 	texto.insert("end", cadena+"\n", "importante")
 	texto.see("end") # Se asegura de ir al final
 
@@ -340,21 +373,13 @@ def trabajaIdle(servidorGUI, checkGUI, prd, texto):
 # 		input(informacion)
 # 	return funcionPrincipal()
 def funcionConsola():
-	if (raspberrypi):
-		codigoIR = lirc.nuevoCodigo()
-		if (codigoIR== KEY_ENTER):
-			funcionPrincipal()
-		elif (codigoIR == KEY_MENU):
-			funcionMenu()
-		return "Esperando"
+	informacion="Conecta un nuevo dispositivo y pulsa <Enter> para configurarlo\n"
+	global servidor
+	if versionPy<(3, 0):	# Python2
+		raw_input(informacion)
 	else:
-		informacion="Conecta un nuevo dispositivo y pulsa <Enter> para configurarlo"
-		global servidor
-		if versionPy<(3, 0):	# Python2
-			raw_input(informacion)
-		else:
-			input(informacion)
-		return funcionPrincipal()
+		input(informacion)
+	return funcionPrincipal()
 
 def checkeaServidor(servidor):
 	"Comprueba que la ip tiene buen formato"
@@ -392,19 +417,31 @@ def barraLedActualiza(progreso):
 def barraLedReset():
 	gpio.output(pinesprogreso,False)
 
+def pinErrorReset():
+	gpio.output(pinerror,False)	
+
 def funcionMenu():
 	global check
+	global checkGUI
+	print("MENU")
 	gpio.output(pinmenu,True)
 	codigoIR = lirc.nuevoCodigo()
 	if (codigoIR == KEY_CHECK):
 		check = not check
+		if(check):
+			print("Solo check")
+		else:
+			print("Configuracion y check")
+		if (checkGUI):
+			checkGUI.set(check+1)
 	elif (codigoIR == KEY_CHANGESERVERIP):
 		funcionCambiarIP()
 	gpio.output(pinmenu,False)
 
 def funcionCambiarIP():
-	print("cambiando IP")
 	global servidor
+	global servidorGUI
+	print("cambiando IP")
 	nuevaIP = ""
 	ipcorrecta = True
 	codigoIR = lirc.nuevoCodigo()
@@ -414,15 +451,68 @@ def funcionCambiarIP():
 	ipcorrecta = checkeaServidor(nuevaIP)
 	if(ipcorrecta == True):
 		servidor = nuevaIP
-		print(servidor)
-	print("Ip cambiada")
+		if (servidorGUI):
+			servidorGUI.set(nuevaIP)
+		print("Nueva IP: "+servidor)
+
+def funcionGestionInfrarrojos():
+	global servidor
+	global checkGUI
+	global prd
+	global texto
+	fin = False
+	while(not fin):
+		codigoIR = lirc.nuevoCodigo()
+		print(codigoIR)
+		if (codigoIR== KEY_ENTER):
+			if(texto):
+				borraConsola(texto) # Borra el texto
+				prd.stop() # Para la animacion de la barra de progreso
+				prd['style']=""
+				prd['mode']='determinate'
+				prd['value']=0 # Pone la barra de progreso a 0
+				prd.update_idletasks() # Actualiza la barra
+			cadena=funcionPrincipal()
+			print(cadena)
+			if(texto):
+				texto.insert("end", cadena+"\n", "importante")
+				texto.see("end") # Se asegura de ir al final
+		elif (codigoIR == KEY_MENU):
+			funcionMenu()
+		elif (codigoIR == ""):
+			fin = True
+
+#funcionCierreParaGUI
+def exitGUI(root):			
+	root.destroy()
+	signal_handler(None,None)
+
+#Manejador de signal para detectar ctrl-C
+def signal_handler(signal, frame):
+	global raspberrypi
+	#Restaurar los valores predeterminados
+	if(raspberrypi == True):
+		lirc.cierraSocket()
+		gpio.cleanup()
+	#Salir del programa
+	sys.exit(0)
+
+signal.signal(signal.SIGINT,signal_handler)
 ###################################
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
 	# TODO: Carga las mibs
+	if(raspberrypi):
+		lirc.iniciaSocket()
+		t = threading.Thread(target = funcionGestionInfrarrojos)
+		t.start()
 	if (modoGrafico): # Si esta en modo grafico carga Tk
 		GUITk()
+	servidorGUI=False
+	checkGUI=False
+	prd = False
+	texto = False
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
 		cadena=funcionConsola()
