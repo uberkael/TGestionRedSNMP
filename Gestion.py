@@ -36,6 +36,7 @@ else:
 ######################
 servidor="10.10.10.2"
 archivo='configuracion.ini'
+lock=False #Variable para evitar ejecucion simultanea de dos funciones principales
 check=False # check, solo comprueba
 iteracion=0 # Lleva la cuenta de las maquinas
 modoGrafico=("DISPLAY" in os.environ) or ("nt" in os.name) # Por si se ejecuta en modo consola
@@ -151,53 +152,59 @@ def checker(snmp, a):
 
 def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 	"La funcion que realiza el trabajo, checkeaServidor()->lector()->setter()/checker()"
-	global iteracion
 	global servidor
+	global lock
 	global check
-	# Aumenta el numero de ejecuciones
-	iteracion=iteracion+1
-	cadena="Ejecutado: "+str(iteracion)
-	print (cadena)
-	if(texto):
-		texto.insert("end", cadena+"\n", "importante")
-		texto.see("end") # Se asegura de ir al final
-	# Si hay variables del GUI, sobreescriben a las globales
-	if(servidorGUI):
-		servidor=servidorGUI
-	# truco con valor trinario
-	if(checkGUI==1):
-		check=False
-	elif (checkGUI==2):
-		check=True
-	# Trabajo
-	if (checkeaServidor(servidor)):
-		# Conexion con el servidor
-		snmp=SNMP(servidor, community="public")  # v2c
-		# Solo comprobar
-		if (check):
-			cadena="Comprobacion:"
-			print (cadena)
-			if(texto):
-				texto.insert("end", cadena+"\n", "importante")
-				texto.see("end") # Se asegura de ir al final
-			lector(snmp, checker, prd, texto)
-		# Asignar y comprobar
+	global iteracion
+	if (not lock):
+		lock=True # Bloque las ejecuciones
+		# Aumenta el numero de ejecuciones
+		iteracion=iteracion+1
+		cadena="Ejecutado: "+str(iteracion)
+		print (cadena)
+		if(texto):
+			texto.insert("end", cadena+"\n", "importante")
+			texto.see("end") # Se asegura de ir al final
+		# Si hay variables del GUI, sobreescriben a las globales
+		if(servidorGUI):
+			servidor=servidorGUI
+		# truco con valor trinario
+		if(checkGUI==1):
+			check=False
+		elif (checkGUI==2):
+			check=True
+		# Trabajo
+		if (checkeaServidor(servidor)):
+			# Conexion con el servidor
+			snmp=SNMP(servidor, community="public")  # v2c
+			# Solo comprobar
+			if (check):
+				cadena="Comprobacion:"
+				print (cadena)
+				if(texto):
+					texto.insert("end", cadena+"\n", "importante")
+					texto.see("end") # Se asegura de ir al final
+				lector(snmp, checker, prd, texto)
+			# Asignar y comprobar
+			else:
+				cadena="Configuracion:"
+				print (cadena)
+				if(texto):
+					texto.insert("end", cadena+"\n", "importante")
+					texto.see("end") # Se asegura de ir al final
+				lector(snmp, setter, prd, texto)
+				cadena="Comprobacion:"
+				print (cadena)
+				if(texto):
+					texto.insert("end", cadena+"\n", "importante")
+					texto.see("end") # Se asegura de ir al final
+				lector(snmp, checker, prd, texto)
+			informacion="Fin Iteracion"
 		else:
-			cadena="Configuracion:"
-			print (cadena)
-			if(texto):
-				texto.insert("end", cadena+"\n", "importante")
-				texto.see("end") # Se asegura de ir al final
-			lector(snmp, setter, prd, texto)
-			cadena="Comprobacion:"
-			print (cadena)
-			if(texto):
-				texto.insert("end", cadena+"\n", "importante")
-				texto.see("end") # Se asegura de ir al final
-			lector(snmp, checker, prd, texto)
-		informacion="Fin Iteracion"
+			informacion="Error "+servidor+" no es una ip"
+		lock=False # Libera las ejecuciones
 	else:
-		informacion="Error "+servidor+" no es una ip"
+		informacion="Ya se esta ejecutando"
 	return informacion
 
 #######
@@ -208,6 +215,11 @@ def GUITk():
 	global servidor # Accede a la variable global para cambiar el valor
 	root=Tk()
 	root.title("Configurador")
+	# Para evitar errores cerrar con el boton
+	def shutdown():
+		root.eval('::ttk::progressbar::stop '+str(prd)) # Puro Tcl/Tk
+		root.destroy()
+	root.protocol("WM_DELETE_WINDOW", shutdown)
 	## Contenedor ##
 	flame=ttk.Frame(root, borderwidth=5, relief="sunken", width=600) # Crea un frame
 	# "flat", "raised", "sunken", "solid", "ridge", or "groove".
@@ -225,7 +237,7 @@ def GUITk():
 	# Abrir archivo
 	menu_file.add_command(label='Open file...', command=selecionaArchivo)
 	menu_file.add_separator() # ver abajo separador
-	menu_file.add_command(label='Close to terminal', command=root.destroy)
+	menu_file.add_command(label='Close to terminal', command=shutdown)
 	menu_file.add_command(label='Close', command=exit)
 	## checkbutton ##
 	checkGUI=IntVar()
@@ -235,6 +247,9 @@ def GUITk():
 	abel=ttk.Label(flame, text='Servidor:')
 	servidorGUI=StringVar() # La variable en Tk tiene que ser un StringVar
 	servidorGUI.set(servidor) # Sustituye la variable original servidor
+	## Control de los cambios en la variable ##
+	# http://effbot.org/tkinterbook/variable.htm
+	# servidorGUI.trace("w", lambda: print("servidor"))
 	campo=ttk.Entry(flame, textvariable=servidorGUI, width=14)
 	## Barra de progreso ##
 	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
