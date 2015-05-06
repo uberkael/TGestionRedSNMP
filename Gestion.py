@@ -165,14 +165,6 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 		if(texto):
 			texto.insert("end", cadena+"\n", "importante")
 			texto.see("end") # Se asegura de ir al final
-		# Si hay variables del GUI, sobreescriben a las globales
-		if(servidorGUI):
-			servidor=servidorGUI
-		# truco con valor trinario
-		if(checkGUI==1):
-			check=False
-		elif (checkGUI==2):
-			check=True
 		# Trabajo
 		if (checkeaServidor(servidor)):
 			# Conexion con el servidor
@@ -241,6 +233,9 @@ def GUITk():
 	menu_file.add_command(label='Close', command=exit)
 	## checkbutton ##
 	checkGUI=IntVar()
+	## Control de los cambios en la variable ##
+	# http://effbot.org/tkinterbook/variable.htm
+	checkGUI.trace("w", lambda *args: updateCheck(checkGUI.get()))
 	checkGUI.set(check+1) # Truco valor trinario
 	menu_edit.add_checkbutton(label='Solo Check', variable=checkGUI, onvalue=2, offvalue=1)
 	## Campo del servidor ##
@@ -249,7 +244,8 @@ def GUITk():
 	servidorGUI.set(servidor) # Sustituye la variable original servidor
 	## Control de los cambios en la variable ##
 	# http://effbot.org/tkinterbook/variable.htm
-	# servidorGUI.trace("w", lambda: print("servidor"))
+	# servidorGUI.trace("w", lambda *args: print(servidorGUI.get()))
+	servidorGUI.trace("w", lambda *args: updateServidor(servidorGUI.get()))
 	campo=ttk.Entry(flame, textvariable=servidorGUI, width=14)
 	## Barra de progreso ##
 	prd=ttk.Progressbar(flame, orient=HORIZONTAL, length=368, mode='determinate')
@@ -316,6 +312,18 @@ def trabajaIdle(servidorGUI, checkGUI, prd, texto):
 	texto.insert("end", cadena+"\n", "importante")
 	texto.see("end") # Se asegura de ir al final
 
+def updateServidor(Nservidor):
+	global servidor
+	servidor=Nservidor
+
+def updateCheck(NCheck):
+	global check
+	# truco con valor trinario
+	if(NCheck==1):
+		check=False
+	elif (NCheck==2):
+		check=True
+
 ########################
 # Funciones auxiliares #
 ########################
@@ -357,5 +365,10 @@ if __name__=="__main__":
 		GUITk()
 	# Bucle principal Idle
 	while (True): # Solo para las interfaces de consola
-		cadena=funcionConsola()
-		print(cadena)
+		try:
+			cadena=funcionConsola()
+			print(cadena)
+		except KeyboardInterrupt as e:
+			print("Adios")
+			exit()
+
