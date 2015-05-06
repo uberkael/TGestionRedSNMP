@@ -197,6 +197,7 @@ def funcionPrincipal(servidorGUI=False, checkGUI=False, prd=False, texto=False):
 		lock=False # Libera las ejecuciones
 	else:
 		informacion="Ya se esta ejecutando"
+	print('\a') # Audio bell
 	return informacion
 
 #######
