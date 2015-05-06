@@ -74,7 +74,7 @@ def lector(snmp, funcion, prd, texto):
 	try:
 		# Lineas y para barra de progreso
 		lineas=cuentaLineas(archivo)
-		porcentaje=100/lineas
+		porcentaje=100.0/lineas
 		# Lectura del archivo
 		f=open(archivo, 'r')
 		progreso=0
@@ -118,6 +118,8 @@ def lector(snmp, funcion, prd, texto):
 		if(texto):
 			texto.insert("end", cadena+"\n", "error")
 			texto.see("end") # Se asegura de ir al final
+		if(prd):
+			prd['style']="red.Horizontal.TProgressbar"
 	finally:
 		pass
 
@@ -336,7 +338,6 @@ def cuentaLineas(archivo):
 # Comienza el programa principal #
 ###################################
 if __name__=="__main__":
-	# TODO: Carga las mibs
 	if (modoGrafico): # Si esta en modo grafico carga Tk
 		GUITk()
 	# Bucle principal Idle
